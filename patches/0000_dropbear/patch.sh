@@ -4,7 +4,7 @@ set -e
 
 ROOTFS=$1
 
-echo "Updating dropbear to 2020.81"
+echo "Updating dropbear..."
 cp -f dropbear "$ROOTFS/usr/sbin/dropbear"
 
 # Generate host keys as needed (so we must not have placeholders)

@@ -24,4 +24,4 @@ $(ROOT_DIR)/$(TOOLCHAIN_TAR):
 	wget -O $@ $(TOOLCHAIN_URL)
 
 $(CC): | $(ROOT_DIR)/$(TOOLCHAIN_TAR)
-	tar -C $(ROOT_DIR) -xf $(TOOLCHAIN_TAR)
+	tar -C $(ROOT_DIR) -xf ${ROOT_DIR}/$(TOOLCHAIN_TAR)
