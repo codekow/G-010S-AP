@@ -1,10 +1,10 @@
-# Convert G-010S-A to G010S-P
+# Convert G-010S-A to G-010S-P
 
 ## Links
 
 - https://hack-gpon.org/ont-huawei-ma5671a/#list-of-firmwares-and-files
 
-Download firmware
+## Download firmware
 
 FS Modded Firmware for Huawei MA5671A and FS.com GPON-ONU-34-20BI
 
@@ -31,7 +31,9 @@ crc32 convert-G-010S-P/mtd2
 # output: 03071158
 ```
 
-Load carlito via XMODEM (serial)
+## Load firmware into uboot
+
+### Load carlito via XMODEM (serial)
 
 ```sh
 # load mtd2 into memory
@@ -45,7 +47,13 @@ crc32 0x82F00000 0x00740000
 # If this doesn't match, DO NOT continue!
 ```
 
-Load ver FS Modded v5.1 via tftp
+### Load ver FS Modded v5.1 via tftp
+
+Start netconsole
+
+```sh
+./netconsole 192.168.1.10
+```
 
 Run TFTP server
 
@@ -72,9 +80,10 @@ crc32 0x82F00000 0x344E66
 # If this doesn't match, DO NOT continue!
 ```
 
+### Convert Flash to G-0105-P
+
 ```sh
 # The following are destructive commands
-
 # erase flash for mtd2
 
 # erase /write memory to flash (mtd2)
@@ -89,6 +98,8 @@ sf write 0x82F00000 0x800000 0x740000
 sf read 0x82F00000 0xC0000 0x740000
 crc32 0x82F00000 0x00740000
 ```
+
+Convert uBoot Env
 
 ```sh
 setenv a0_image
