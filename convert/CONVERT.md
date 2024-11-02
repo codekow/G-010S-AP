@@ -28,7 +28,28 @@ sudo dnsmasq \
   --tftp-no-blocksize
 ```
 
-Load firmware
+Download firmware
+
+FS Modded Firmware for Huawei MA5671A and FS.com GPON-ONU-34-20BI
+
+- https://hack-gpon.org/ont-huawei-ma5671a-fs-mod/
+
+```sh
+md5sum convert-G-010S-P/6BA1896SPLQA42_MODDED_ver5-1.img
+# md5hash: c4f1bbe1695803d3d449f911f43d78ea
+```
+
+Carlito
+
+- https://hack-gpon.org/ont-huawei-ma5671a-carlito/
+- https://hack-gpon.org/ont-huawei-ma5671a/#list-of-firmwares-and-files
+
+```sh
+md5sum convert-G-010S-P/mtd2
+# md5hash: d3cb6f7efec201b37931139feb4bb23b
+```
+
+Load carlito via XMODEM (serial)
 
 ```sh
 # load mtd2 into memory
@@ -42,7 +63,7 @@ crc32 0x82F00000 0x00740000
 # If this doesn't match, DO NOT continue!
 ```
 
-Load ver 5.1
+Load ver FS Modded v5.1 via tftp
 
 ```sh
 # load mtd2 into memory
@@ -67,7 +88,7 @@ sf write 0x82F00000 0xC0000 0x740000
 sf erase 0x800000 0x800000
 sf write 0x82F00000 0x800000 0x740000
 
-# read flash to memory, verify crc
+# read flash (mtd5) to memory, verify crc
 sf read 0x82F00000 0xC0000 0x740000
 crc32 0x82F00000 0x00740000
 ```

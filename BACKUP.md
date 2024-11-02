@@ -10,7 +10,8 @@ cd /tmp/dump
 # capture config
 cat /proc/mtd > mtd
 cat /proc/cmdline > cmdline
-fw_printenv > fw_printenv
+fw_printenv > env.txt
+ritool dump > ritool.txt
 
 # save flash
 for i in /dev/mtd?

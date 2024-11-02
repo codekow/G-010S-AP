@@ -82,6 +82,16 @@ Reminder: The IP for the NetConsole client needs to be in the same subnet as
 the SFP module (`192.168.1.100` by default).
 
 ```sh
+fw_setenv bootdelay 5
+fw_setenv asc0 0
+fw_setenv preboot
+
+fw_setenv target oem-generic
+# avoids auto-reboot
+# fw_setenv bootretry -1
+```
+
+```sh
 fw_setenv bootdelay '5'
 fw_setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
 fw_setenv start_netconsole 'echo netconsole enabled; run netconsole'
