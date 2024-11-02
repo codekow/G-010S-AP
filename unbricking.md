@@ -87,8 +87,6 @@ fw_setenv asc0 0
 fw_setenv preboot
 
 fw_setenv target oem-generic
-# avoids auto-reboot
-# fw_setenv bootretry -1
 ```
 
 ```sh

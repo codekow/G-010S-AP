@@ -43,7 +43,6 @@ loadx 0x82F00000
 # check memory
 crc32 0x82F00000 0x00740000
 # CRC32 for 82f00000 ... 8363ffff ==> 03071158
-# verify the result is 0x03071158
 # If this doesn't match, DO NOT continue!
 ```
 
@@ -52,7 +51,11 @@ crc32 0x82F00000 0x00740000
 Start netconsole
 
 ```sh
+killall nc
 ./netconsole 192.168.1.10
+
+# avoids auto-reboot
+# setenv bootretry -1
 ```
 
 Run TFTP server
@@ -76,7 +79,7 @@ tftpboot 0x82F00000 convert-G-010S-P/6BA1896SPLQA42_MODDED_ver5-1.img
 
 # check memory
 crc32 0x82F00000 0x344E66
-# CRC32 for 82f00000 ... 8363ffff ==> 58736C78
+# CRC32 for 82f00000 ... 83244e65 ==> 58736C78
 # If this doesn't match, DO NOT continue!
 ```
 
@@ -110,6 +113,7 @@ setenv addmtdparts0 'setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_en
 setenv addmtdparts1 'setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(image0),8192k(linux)'
 setenv bertEnable 0
 setenv bootargs
+setenv bootretry
 setenv boot_fail
 setenv c_img 0
 setenv commit 0
@@ -147,4 +151,6 @@ setenv update_openwrt
 setenv update_ri     
 setenv update_system
 saveenv
+
+run select_image boot_image
 ```
