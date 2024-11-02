@@ -4,30 +4,6 @@
 
 - https://hack-gpon.org/ont-huawei-ma5671a/#list-of-firmwares-and-files
 
-Convert MTD layout
-
-```sh
-crc32 6BA1896SPLQA42_MODDED_ver5-1.img
-# output: 58736C78
-
-
-```
-
-Run TFTP server
-
-```sh
-sudo systemctl stop firewalld
-sudo dnsmasq \
-  -d \
-  -a 0.0.0.0 \
-  --port=0 \
-  --enable-tftp \
-  --tftp-root=$(pwd) \
-  --tftp-no-fail \
-  --tftp-secure \
-  --tftp-no-blocksize
-```
-
 Download firmware
 
 FS Modded Firmware for Huawei MA5671A and FS.com GPON-ONU-34-20BI
@@ -37,6 +13,9 @@ FS Modded Firmware for Huawei MA5671A and FS.com GPON-ONU-34-20BI
 ```sh
 md5sum convert-G-010S-P/6BA1896SPLQA42_MODDED_ver5-1.img
 # md5hash: c4f1bbe1695803d3d449f911f43d78ea
+
+crc32 convert-G-010S-P/6BA1896SPLQA42_MODDED_ver5-1.img
+# output: 58736C78
 ```
 
 Carlito
@@ -47,6 +26,9 @@ Carlito
 ```sh
 md5sum convert-G-010S-P/mtd2
 # md5hash: d3cb6f7efec201b37931139feb4bb23b
+
+crc32 convert-G-010S-P/mtd2
+# output: 03071158
 ```
 
 Load carlito via XMODEM (serial)
@@ -64,6 +46,21 @@ crc32 0x82F00000 0x00740000
 ```
 
 Load ver FS Modded v5.1 via tftp
+
+Run TFTP server
+
+```sh
+sudo systemctl stop firewalld
+sudo dnsmasq \
+  -d \
+  -a 0.0.0.0 \
+  --port=0 \
+  --enable-tftp \
+  --tftp-root=$(pwd) \
+  --tftp-no-fail \
+  --tftp-secure \
+  --tftp-no-blocksize
+```
 
 ```sh
 # load mtd2 into memory
