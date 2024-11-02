@@ -9,7 +9,7 @@ NetConsole or a serial console.
 By default the bootloader is locked and will not display a serial console / will
 not allow interrupting the boot. NetConsole is also disabled by default.
 
-After enabling any of the below make sure to check that ```bootdelay``` is set
+After enabling any of the below make sure to check that `bootdelay` is set
 to a suitable value (i.e., a value greater than 0).
 
 ### Enabling Serial Console and NetConsole
@@ -18,16 +18,16 @@ WARNING: Opening the serial console could cause the "pin 6" issue ([known
 compatibility](README.md#compatibility)).
 
 To unlock the bootloader and enable serial and NetConsole while the SFP module
-still working:
+is still working:
 
-```
+```sh
 ONTUSER@SFP:~# serial open
 disabled serial and enable present pin
 ```
 
 To disable the serial console again use:
 
-```
+```sh
 ONTUSER@SFP:~# serial close
 disabled serial and enable present pin
 ```
@@ -49,9 +49,9 @@ hardware combinations:
 ##### Configure BCM57810S
 
 For the NetConsole to work on BCM57810S hosts a configuration change is
-needed to set the Serdes interface to SGMII. Use ediag in engineering mode:
+needed to set the Serdes interface to SGMII. Use `ediag` in engineering mode:
 
-```
+```sh
 device 1
 nvm cfg
 11 ;                (phy)
@@ -62,7 +62,7 @@ exit
 
 To reset to SFI:
 
-```
+```sh
 device 1
 nvm cfg
 11 ;                (phy)
@@ -74,27 +74,31 @@ exit
 #### Configure NetConsole Host
 
 To also start NetConsole you need to set the target host for the console
-input/output: ``` ONTUSER@SFP:~# fw_setenv ncip 192.168.1.1 ``` Replace the IP
-address with the right value for your network. It must be an address that is
-reachable directly by the SFP as no gateway is configured by default. The IP
-needs to respond to a ping at the time the SFP boots to start the NetConsole.
+input/output: The IP needs to respond to a ping at the time the SFP boots to start the NetConsole.
 
 ## U-boot Connection Using NetConsole
 
 Reminder: The IP for the NetConsole client needs to be in the same subnet as
-the SFP module (```192.168.1.X``` by default).
+the SFP module (`192.168.1.100` by default).
+
+```sh
+fw_setenv bootdelay '5'
+fw_setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
+fw_setenv start_netconsole 'echo netconsole enabled; run netconsole'
+fw_setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,serial; set stdout nc,serial; version;'
+fw_setenv preboot 'run if_netconsole start_netconsole'
+```
 
 NetConsole uses UDP on port 6666. Run a NetConsole client on the machine
-specified by ```ncip```, e.g., netcat. With netcat it is necessary to map the
+specified by `ncip`, e.g., netcat. With netcat it is necessary to map the
 interrupt signal from "Ctlr-C" to another key:
 
-```
+```sh
 # stty intr ^K
 # nc -u -l -p 6666
 netconsole enabled
 Press SPACE to delay and Ctrl-C to abort autoboot in 5 seconds
 
- 
 FALCON => 
 ```
 
@@ -102,7 +106,7 @@ After pressing "Ctrl-C" followed by "Enter" you will see the prompt for the
 u-boot console. Press "Ctrl-K" to terminate the NetConsole. To reset the normal
 behavior for "Ctrl-C" use:
 
-```
+```sh
 # stty intr ^C
 ```
 
@@ -143,14 +147,18 @@ initialization will then cause a restart of the module.
 
 Connect to the UART with 115200 baud, e.g.:
 
+```sh
+screen /dev/ttyUSB0 115200
 ```
-screen /dev/tty.usb-device 115200
+
+```sh
+minicom -s -D /dev/ttyUSB0
 ```
 
 Then connect the SFP module to the Molex connector.  If the bootloader is
 unlocked the boot prompt looks like this:
 
-```
+```sh
 ROM: V1.1.4
 ROM: CFG 0x00000006
 ROM: SFLASH-4
@@ -159,9 +167,10 @@ Bootmode: 0x06
 Reset cause: Power-On Reset
 CPU Clock: 400 MHz
 Net:   SGMII, SERDES [PRIME]
-Press SPACE to delay and Ctrl-C to abort autoboot in 5 seconds
+Press SPACE to delay and Ctrl-C to abort autoboot in 10 seconds
 FALCON =>
 ```
+
 Press Ctrl-C to abort the boot to get u-boot access, you will see the
 prompt for the u-boot console.
 
@@ -174,13 +183,13 @@ Unprepared SFP Modules](#unlock_bricked).
 ### Fixing Environment Issues
 
 If the bricking was caused by a bad u-boot environment it can be fixed using
-``setenv``. After changing the environment use ``saveenv`` to make the changes
+`setenv`. After changing the environment use `saveenv` to make the changes
 permanent.
 
 For example, if the active image 1 is not bootable, but image 0 is still
 bootable then use:
 
-```
+```sh
 setenv next_active 0
 setenv commit 1
 saveenv
@@ -201,13 +210,13 @@ The two images are stored at 0xC0000(length 0x600000) and 0x6C0000(length
 One option for network transfer is to use the NetConsole connection,
 e.g., using socat
 
-```
+```sh
 socat udp-listen:6666 SYSTEM:/path/to/script
 ```
 
 The script interrupts the boot and transfers a file to the SFP module:
 
-```
+```sh
 expect -c '
   expect "Press SPACE"
   send -- "\003"
@@ -220,7 +229,7 @@ sx /path/to/firmware.bin
 After the script terminates the file is transferred and you can
 connect to the NetConsole via netcat to flash the firmware:
 
-```
+```sh
 nc -u -p 6666 192.168.1.10 6666
 ```
 
@@ -232,7 +241,7 @@ already set up but not sending any data actively.
 If there is a tftp server available the firmware image can also be
 transferred via TFTP (replace 192.168.1.1 with your TFTP server):
 
-```
+```sh
 FALCON => setenv serverip 192.168.1.1
 FALCON => tftpboot 0x80800000 /path/to/tfp_image
 ```
@@ -251,10 +260,10 @@ Once the file is transferred you can flash the firmware.
 
 #### Flash Firmware
 
-Firmware can be flashed using ```sf``` in u-boot. For example, to replace
-the first image with an image loaded to 0x80800000 and activate it use: 
+Firmware can be flashed using `sf` in u-boot. For example, to replace
+the first image with an image loaded to 0x80800000 and activate it use:
 
-```
+```sh
 FALCON => sf probe 0
 FALCON => sf erase C0000 600000
 FALCON => sf write 80800000 C0000 600000
@@ -289,7 +298,7 @@ Once the boot prompt is visible remove the short between the pins.
 
 With the shorted flash chip the boot ends up in the recovery console:
 
-```
+```sh
 ROM: V1.1.4
 ROM: CFG 0x00000006
 ROM: SFLASH-4
@@ -313,9 +322,10 @@ ROM: CFG 0x00000006
 ROM: SFLASH-4
 ROM: Boot? (0-9A-F<CR>)
 ```
+
 Enter 7 as the boot option, this will start an XMODEM transfer.
 
-```
+```sh
 ROM: CFG 0x00000007
 ROM: XMODEM
 CCCC
@@ -325,7 +335,7 @@ Upload [1224ABORT.bin](bootloader/1224ABORT.bin) via XMODEM.
 
 This will drop into a regular u-boot prompt.
 
-```
+```sh
 CCCC
 Sending 1224ABORT.bin, 1582 blocks: Give your local XMODEM receive command now.
 Bytes Sent: 202624   BPS:7712
@@ -347,16 +357,17 @@ FALCON =>
 
 ### Update the Environment to Enable Serial Console / NetConsole
 
-Manually do the setup that would be done with ```serial open``` during the
+Manually do the setup that would be done with `serial open` during the
 preparation step:
 
-```
+```sh
 FALCON => setenv asc0 0
 FALCON => setenv preboot run start_netconsole
 ```
 
 To get a NetConsole also set the IP:
-```
+
+```sh
 FALCON => setenv ncip 192.168.1.1
 ```
 
