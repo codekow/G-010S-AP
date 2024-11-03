@@ -1,5 +1,5 @@
---- ../backup/env-defaults.txt	2024-11-03 15:22:16.696133605 -0600
-+++ G-010S-P.env.txt	2024-11-03 15:25:28.487657967 -0600
+--- backup/G-010S-A.env.txt	2024-11-03 15:22:16.696133605 -0600
++++ convert/G-010S-P.env.txt	2024-11-03 15:48:35.627129638 -0600
 @@ -3,12 +3,13 @@
  a2_image=3FE46542AAAA_a2.bin
  act_img_addr=0xBF20003C
@@ -7,10 +7,11 @@
 -addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype}  vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts} quiet
 -addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
 -addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(image0),6144k(linux),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
+-asc0=3
 +addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} ignore_loglevel vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts}
 +addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)
 +addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(image0),8192k(linux)
- asc0=3
++asc0=0
  baudrate=115200
 -bootargs=rootfstype=squashfs,jffs2 ip=192.168.1.10:192.168.1.100:192.168.2.1::::off ethaddr=ac:9a:96:00:00:00 machtype=SFP vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup) quiet
 +bertEnable=0
