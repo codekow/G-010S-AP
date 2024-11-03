@@ -48,16 +48,6 @@ crc32 0x82F00000 0x00740000
 
 ### Load ver FS Modded v5.1 via tftp
 
-Start netconsole
-
-```sh
-killall nc
-./netconsole 192.168.1.10
-
-# avoids auto-reboot
-# setenv bootretry -1
-```
-
 Run TFTP server
 
 ```sh
@@ -73,13 +63,20 @@ sudo dnsmasq \
   --tftp-no-blocksize
 ```
 
+Start netconsole
+
+```sh
+killall nc
+./netconsole 192.168.1.10
+```
+
 ```sh
 # load mtd2 into memory
 tftpboot 0x82F00000 convert-G-010S-P/6BA1896SPLQA42_MODDED_ver5-1.img
 
 # check memory
 crc32 0x82F00000 0x344E66
-# CRC32 for 82f00000 ... 83244e65 ==> 58736C78
+# CRC32 for 82f00000 ... 83244e65 ==> 58736c78
 # If this doesn't match, DO NOT continue!
 ```
 
@@ -88,6 +85,7 @@ crc32 0x82F00000 0x344E66
 ```sh
 # The following are destructive commands
 # erase flash for mtd2
+sf probe 0
 
 # erase /write memory to flash (mtd2)
 sf erase 0xC0000 0x740000
@@ -95,11 +93,19 @@ sf write 0x82F00000 0xC0000 0x740000
 
 # erase /write memory to flash (mtd5)
 sf erase 0x800000 0x800000
-sf write 0x82F00000 0x800000 0x740000
+sf write 0x82F00000 0x800000 0x800000
+```
 
-# read flash (mtd5) to memory, verify crc
+```sh
+# read flash (mtd2) to memory, verify crc
 sf read 0x82F00000 0xC0000 0x740000
 crc32 0x82F00000 0x00740000
+# CRC32 for 82f00000 ... 8363ffff ==> 2ebe0a35
+
+# read flash (mtd5) to memory, verify crc
+sf read 0x82F00000 0x800000 0x800000
+crc32 0x82F00000 0x800000
+# CRC32 for 82f00000 ... 836fffff ==> cdc9fd4b
 ```
 
 Convert uBoot Env
@@ -115,6 +121,7 @@ setenv bertEnable 0
 setenv bootargs
 setenv bootretry
 setenv boot_fail
+
 setenv c_img 0
 setenv commit 0
 setenv committed_image 0
@@ -124,23 +131,24 @@ setenv filesize 400092
 setenv gphy0_phyaddr 0
 setenv gphy1_phyaddr 1
 setenv image0_is_valid 1
-setenv image0_version 3FE56853AOPD39
+setenv image0_version 'FS v5'
 setenv image1_is_valid 0
 setenv image_name openwrt-lantiq-falcon-SFP
 setenv kernel1_offs '0x800000'
 setenv load_kernel
 setenv load_uboot
 setenv mtdparts
-setenv nSerial ALCLFAB759C8
-setenv netconsole
+setenv nSerial <MfrID><YPSerialNum>
 setenv next_active
 setenv omci_loid loid
 setenv omci_lpwd loidpass
+
 setenv ri_hiaddr
 setenv ri_image
 setenv ri_siaddr
-setenv start_netconsole
+
 setenv select_image 'setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;mw ${magic_addr} 0x0;mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 && test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0'
+
 setenv update_A0
 setenv update_A2
 setenv update_configfs
@@ -150,7 +158,14 @@ setenv update_logfs
 setenv update_openwrt
 setenv update_ri     
 setenv update_system
+
+setenv bootdelay '5'
+setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
+setenv start_netconsole 'echo netconsole enabled; run netconsole'
+setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,serial; set stdout nc,serial; version;'
+setenv preboot 'run if_netconsole start_netconsole'
+
 saveenv
 
-run select_image boot_image
+run select_image boot_image0
 ```

@@ -273,8 +273,8 @@ the first image with an image loaded to 0x80800000 and activate it use:
 
 ```sh
 FALCON => sf probe 0
-FALCON => sf erase C0000 600000
-FALCON => sf write 80800000 C0000 600000
+FALCON => sf erase 0xC0000 600000
+FALCON => sf write 0x80800000 0xC0000 0x600000
 FALCON => setenv commit 0
 FALCON => setenv next_active 0
 FALCON => saveenv
@@ -379,7 +379,7 @@ To get a NetConsole also set the IP:
 FALCON => setenv ncip 192.168.1.1
 ```
 
-Check ```bootdelay``` to ensure that it is greater than 0.
+Check `bootdelay` to ensure that it is greater than 0.
 
 Finally save the changes:
 
