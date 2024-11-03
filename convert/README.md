@@ -54,6 +54,7 @@ Run TFTP server
 sudo systemctl stop firewalld
 sudo dnsmasq \
   -d \
+  -i eth0 \
   -a 0.0.0.0 \
   --port=0 \
   --enable-tftp \
@@ -138,11 +139,12 @@ setenv kernel1_offs '0x800000'
 setenv load_kernel
 setenv load_uboot
 setenv mtdparts
+
 setenv nSerial <MfrID><YPSerialNum>
+
 setenv next_active
 setenv omci_loid loid
 setenv omci_lpwd loidpass
-
 setenv ri_hiaddr
 setenv ri_image
 setenv ri_siaddr
@@ -173,17 +175,22 @@ run select_image boot_image0
 Update uBoot
 
 ```sh
-md5sum 0_uboot.bin
-# md5sum 992b31a67c644aa68cf7f9caf956b1f9
+md5sum 1224ABORT.bin
+# md5hash: 10e94a4b4acdc82dec20c7904b69e5c0
 ```
 
 ```sh
 # load mtd0 into memory
-tftpboot 0x82F00000 convert-G-010S-P/0_uboot.bin
+tftpboot 0x82F00000 convert-G-010S-P/1.3.6.1-2018.bin
+crc32 0x82F00000 0x262144
+# CRC32 for 82f00000 ... 83162143 ==> c68feb79
 
-# check memory
-crc32 0x82F00000 0x344E66
-# If this doesn't match, DO NOT continue!
+# load mtd0 into memory
+tftpboot 0x82F00000 convert-G-010S-P/1224ABORT.bin
+crc32 0x82F00000 0x31730
+# CRC32 for 82f00000 ... 82f3172f ==> 92b9ef9d
+
+# If CRC32 doesn't match, DO NOT continue!
 ```
 
 ```sh

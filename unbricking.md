@@ -32,6 +32,16 @@ ONTUSER@SFP:~# serial close
 disabled serial and enable present pin
 ```
 
+The following can also be used to enable console access and prepare for [conversion](convert/README.md). Also see [known
+compatibility](README.md#compatibility).
+
+```sh
+fw_setenv bootdelay '5'
+fw_setenv asc0 0
+fw_setenv preboot
+fw_setenv target oem-generic
+```
+
 #### NetConsole Compatibility
 
 NetConsole does not work in all circumstances. It seems to come down to specific
@@ -45,6 +55,10 @@ hardware combinations:
 | 3FE46541AADA      | 10Gtek WG-33-1GX1GT-SFP   | Y                  |
 | 3FE46541AADA      | Netgear GS752TPV2         | Y                  |
 | 3FE46541AADA      | CSR305                    | Pin 6 issue        |
+
+The following U-Boot appears to be stable with NetConsole:
+
+- [1.3.6.1-2018.bin](bootloader/1.3.6.1-2018.bin) `md5sum: 6d655a18f8e6e6211c212cfa0e679fd1`
 
 ##### Configure BCM57810S
 
@@ -71,23 +85,13 @@ save
 exit
 ```
 
-#### Configure NetConsole Host
+#### Configure Host for NetConsole
 
-To also start NetConsole you need to set the target host for the console
-input/output: The IP needs to respond to a ping at the time the SFP boots to start the NetConsole.
+The IP `192.168.1.100` needs to respond to a ping at the time the SFP boots to start the NetConsole.
 
-## U-boot Connection Using NetConsole
+Set host IP specifically to `192.168.1.100/24` to enable NetConsole.
 
-Reminder: The IP for the NetConsole client needs to be in the same subnet as
-the SFP module (`192.168.1.100` by default).
-
-```sh
-fw_setenv bootdelay 5
-fw_setenv asc0 0
-fw_setenv preboot
-
-fw_setenv target oem-generic
-```
+## Configure U-boot for NetConsole
 
 ```sh
 fw_setenv bootdelay '5'
@@ -97,13 +101,18 @@ fw_setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,
 fw_setenv preboot 'run if_netconsole start_netconsole'
 ```
 
-NetConsole uses UDP on port 6666. Run a NetConsole client on the machine
+NetConsole uses `UDP` on port `6666`. Run a NetConsole client on the machine
 specified by `ncip`, e.g., netcat. With netcat it is necessary to map the
 interrupt signal from "Ctlr-C" to another key:
 
 ```sh
-# stty intr ^K
-# nc -u -l -p 6666
+stty intr ^T
+nc -u -l -p 6666
+```
+
+Expected Output:
+
+```sh
 netconsole enabled
 Press SPACE to delay and Ctrl-C to abort autoboot in 5 seconds
 
@@ -111,16 +120,16 @@ FALCON =>
 ```
 
 After pressing "Ctrl-C" followed by "Enter" you will see the prompt for the
-u-boot console. Press "Ctrl-K" to terminate the NetConsole. To reset the normal
+u-boot console. Press "Ctrl-T" to terminate the NetConsole. To reset the normal
 behavior for "Ctrl-C" use:
 
 ```sh
-# stty intr ^C
+stty intr ^C
 ```
 
 At the end of the session reset the module to run the regular boot:
 
-```
+```sh
 FALCON => reset
 ```
 
@@ -175,7 +184,7 @@ Bootmode: 0x06
 Reset cause: Power-On Reset
 CPU Clock: 400 MHz
 Net:   SGMII, SERDES [PRIME]
-Press SPACE to delay and Ctrl-C to abort autoboot in 10 seconds
+Press SPACE to delay and Ctrl-C to abort autoboot in 5 seconds
 FALCON =>
 ```
 
@@ -208,12 +217,38 @@ saveenv
 Credit to anon23891239 describing it [here](https://forum.openwrt.org/t/support-ma5671a-sfp-gpon/48042/24).
 
 If no bootable firmware image is left the images can be replaced via u-boot.
-The two images are stored at 0xC0000(length 0x600000) and 0x6C0000(length
-0x600000) respectively.
+
+The two images are stored at:
+
+- image0 - start: `0x0C0000`, length `0x600000`
+- image1 - start: `0x6C0000`, length `0x600000`
 
 #### Transfer Firmware Via Network
 
-##### Using NetConsole
+##### Using TFTP
+
+If there is a tftp server available the firmware image can also be
+transferred via TFTP (replace 192.168.1.100 if you have an alternative TFTP server).
+
+If you have setup U-Boot as [shown above](#configure-u-boot-for-netconsole) you can use the following.
+
+```sh
+tftpboot 0x80800000 /path/to/tfp_image
+```
+
+#### Transfer Firmware Via Serial Cable
+
+With a serial cable you can upload a firmware image onto the machine using a
+Kermit transfer (use loady for YMODEM, loadx for XMODEM):
+
+```
+FALCON => loadb 0x80800000
+## Ready for binary (kermit) download to 0x80800000 at 115200 bps...
+```
+
+Once the file is transferred you can flash the firmware.
+
+##### Using Socat
 
 One option for network transfer is to use the NetConsole connection,
 e.g., using socat
@@ -222,7 +257,7 @@ e.g., using socat
 socat udp-listen:6666 SYSTEM:/path/to/script
 ```
 
-The script interrupts the boot and transfers a file to the SFP module:
+The following script interrupts the boot and transfers a file to the SFP module:
 
 ```sh
 expect -c '
@@ -243,28 +278,6 @@ nc -u -p 6666 192.168.1.10 6666
 
 In this case netcat is used in client mode as the NetConsole is
 already set up but not sending any data actively.
-
-##### Using TFTP
-
-If there is a tftp server available the firmware image can also be
-transferred via TFTP (replace 192.168.1.1 with your TFTP server):
-
-```sh
-FALCON => setenv serverip 192.168.1.1
-FALCON => tftpboot 0x80800000 /path/to/tfp_image
-```
-
-#### Transfer Firmware Via Serial Cable
-
-With a serial cable you can upload a firmware image onto the machine using a
-Kermit transfer (use loady for YMODEM, loadx for XMODEM):
-
-```
-FALCON => loadb 0x80800000
-## Ready for binary (kermit) download to 0x80800000 at 115200 bps...
-```
-
-Once the file is transferred you can flash the firmware.
 
 #### Flash Firmware
 
