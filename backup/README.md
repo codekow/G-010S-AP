@@ -4,6 +4,8 @@ See [U-Boot Defaults](env-defaults.txt)
 
 ## Capture files from device
 
+`ONTUSER@SFP#`
+
 ```sh
 ssh ONTUSER@192.168.1.10 # SUGAR2A041
 ```

@@ -37,7 +37,7 @@ compatibility](README.md#compatibility).
 
 ```sh
 fw_setenv bootdelay '5'
-fw_setenv asc0 0
+fw_setenv asc0 '0'
 fw_setenv preboot
 fw_setenv target oem-generic
 ```
@@ -56,7 +56,7 @@ hardware combinations:
 | 3FE46541AADA      | Netgear GS752TPV2         | Y                  |
 | 3FE46541AADA      | CSR305                    | Pin 6 issue        |
 
-The following U-Boot appears to be stable with NetConsole:
+The following U-Boot appears to be more stable with NetConsole:
 
 - [1.3.6.1-2018.bin](bootloader/1.3.6.1-2018.bin) `md5sum: 6d655a18f8e6e6211c212cfa0e679fd1`
 

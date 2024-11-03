@@ -1,0 +1,43 @@
+a0_image
+a2_iaddr
+a2_image
+addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} ignore_loglevel vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts}
+addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)
+addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(image0),8192k(linux)
+bertEnable=0
+bootargs
+boot_fail
+bootretry
+c_img=0
+commit=0
+committed_image=0
+config_iaddr
+fileaddr=80F00000
+filesize=400092
+gphy0_phyaddr=0
+gphy1_phyaddr=1
+image0_is_valid=1
+image0_version=FS v5
+image1_is_valid=0
+image_name=openwrt-lantiq-falcon-SFP
+kernel1_offs=0x800000
+load_kernel
+load_uboot
+mtdparts
+next_active
+nSerial=HWTC1CFA349A
+omci_loid=loid
+omci_lpwd=loidpass
+ri_hiaddr
+ri_image
+ri_siaddr
+select_image=setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;mw ${magic_addr} 0x0;mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 && test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0
+update_A0
+update_A2
+update_configfs
+update_image0
+update_image1
+update_logfs
+update_openwrt
+update_ri     
+update_system

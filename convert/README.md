@@ -139,8 +139,7 @@ setenv kernel1_offs '0x800000'
 setenv load_kernel
 setenv load_uboot
 setenv mtdparts
-
-setenv nSerial <MfrID><YPSerialNum>
+setenv nSerial 'HWTC1CFA349A'
 
 setenv next_active
 setenv omci_loid loid
@@ -166,13 +165,26 @@ setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
 setenv start_netconsole 'echo netconsole enabled; run netconsole'
 setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,serial; set stdout nc,serial; version;'
 setenv preboot 'run if_netconsole start_netconsole'
+```
 
+Set SN
+
+```sh
+# find info from ritool dump
+setenv nSerial <MfrID><YPSerialNum>
+```
+
+Save U-Boot Env
+
+```sh
 saveenv
+```
 
+```sh
 run select_image boot_image0
 ```
 
-Update uBoot
+Update uBoot (optional, DANGEROUS)
 
 ```sh
 md5sum 1224ABORT.bin
@@ -184,12 +196,6 @@ md5sum 1224ABORT.bin
 tftpboot 0x82F00000 convert-G-010S-P/1.3.6.1-2018.bin
 crc32 0x82F00000 0x262144
 # CRC32 for 82f00000 ... 83162143 ==> c68feb79
-
-# load mtd0 into memory
-tftpboot 0x82F00000 convert-G-010S-P/1224ABORT.bin
-crc32 0x82F00000 0x31730
-# CRC32 for 82f00000 ... 82f3172f ==> 92b9ef9d
-
 # If CRC32 doesn't match, DO NOT continue!
 ```
 
