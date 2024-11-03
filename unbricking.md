@@ -93,12 +93,27 @@ Set host IP specifically to `192.168.1.100/24` to enable NetConsole.
 
 ## Configure U-boot for NetConsole
 
+`ONTUSER@SFP#` - via SSH
+
 ```sh
+fw_setenv asc0 0
 fw_setenv bootdelay '5'
 fw_setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
 fw_setenv start_netconsole 'echo netconsole enabled; run netconsole'
 fw_setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,serial; set stdout nc,serial; version;'
 fw_setenv preboot 'run if_netconsole start_netconsole'
+```
+
+`FALCON =>` - via U-Boot
+
+```sh
+setenv asc0 0
+setenv bootdelay '5'
+setenv if_netconsole 'sleep 5; echo check for netconsole; ping $serverip'
+setenv start_netconsole 'echo netconsole enabled; run netconsole'
+setenv netconsole 'setenv ncip $serverip; set stderr nc,serial; set stdin nc,serial; set stdout nc,serial; version;'
+setenv preboot 'run if_netconsole start_netconsole'
+saveenv
 ```
 
 NetConsole uses `UDP` on port `6666`. Run a NetConsole client on the machine
@@ -220,8 +235,10 @@ If no bootable firmware image is left the images can be replaced via u-boot.
 
 The two images are stored at:
 
-- image0 - start: `0x0C0000`, length `0x600000`
-- image1 - start: `0x6C0000`, length `0x600000`
+| Image | Start      | Length     |
+| ----- | ---------- | ---------- |
+| `0`   | `0x0C0000` | `0x600000` |
+| `1`   | `0x6C0000` | `0x600000` |
 
 #### Transfer Firmware Via Network
 
@@ -232,8 +249,10 @@ transferred via TFTP (replace 192.168.1.100 if you have an alternative TFTP serv
 
 If you have setup U-Boot as [shown above](#configure-u-boot-for-netconsole) you can use the following.
 
+`FALCON =>`
+
 ```sh
-tftpboot 0x80800000 /path/to/tfp_image
+tftpboot 0x80800000 /path/to/tftp_image
 ```
 
 #### Transfer Firmware Via Serial Cable
@@ -241,8 +260,14 @@ tftpboot 0x80800000 /path/to/tfp_image
 With a serial cable you can upload a firmware image onto the machine using a
 Kermit transfer (use loady for YMODEM, loadx for XMODEM):
 
+`FALCON =>`
+
+```sh
+loadb 0x80800000
 ```
-FALCON => loadb 0x80800000
+Expected Output:
+
+```sh
 ## Ready for binary (kermit) download to 0x80800000 at 115200 bps...
 ```
 
@@ -250,12 +275,7 @@ Once the file is transferred you can flash the firmware.
 
 ##### Using Socat
 
-One option for network transfer is to use the NetConsole connection,
-e.g., using socat
-
-```sh
-socat udp-listen:6666 SYSTEM:/path/to/script
-```
+One option for network transfer is to use the NetConsole connection using socat.
 
 The following script interrupts the boot and transfers a file to the SFP module:
 
@@ -269,31 +289,47 @@ expect -c '
 sx /path/to/firmware.bin
 ```
 
+```sh
+socat udp-listen:6666 SYSTEM:/path/to/script
+```
+
 After the script terminates the file is transferred and you can
-connect to the NetConsole via netcat to flash the firmware:
+connect to the NetConsole via netcat to flash the firmware.
+
+In this case netcat is used in client mode as the NetConsole is
+already set up but not sending any data actively.
+
+Using the `netconsole` script in this repo should be more reliable
+than a basic `netcat` command.
+
+```sh
+./netconsole 192.168.1.10
+```
+
+Alternative
 
 ```sh
 nc -u -p 6666 192.168.1.10 6666
 ```
-
-In this case netcat is used in client mode as the NetConsole is
-already set up but not sending any data actively.
 
 #### Flash Firmware
 
 Firmware can be flashed using `sf` in u-boot. For example, to replace
 the first image with an image loaded to 0x80800000 and activate it use:
 
+`FALCON =>`
+
 ```sh
-FALCON => sf probe 0
-FALCON => sf erase 0xC0000 600000
-FALCON => sf write 0x80800000 0xC0000 0x600000
-FALCON => setenv commit 0
-FALCON => setenv next_active 0
-FALCON => saveenv
+sf probe 0
+sf erase 0xC0000 600000
+sf write 0x80800000 0xC0000 0x600000
+setenv commit 0
+setenv next_active 0
+saveenv
 ```
 
 ## Unbrick Unprepared SFP Modules
+
 <a id="unlock_bricked"></a>
 
 If a SFP module is bricked but it is not prepared with the above then it's still
@@ -356,6 +392,8 @@ Upload [1224ABORT.bin](bootloader/1224ABORT.bin) via XMODEM.
 
 This will drop into a regular u-boot prompt.
 
+Expected Output:
+
 ```sh
 CCCC
 Sending 1224ABORT.bin, 1582 blocks: Give your local XMODEM receive command now.
@@ -381,23 +419,21 @@ FALCON =>
 Manually do the setup that would be done with `serial open` during the
 preparation step:
 
-```sh
-FALCON => setenv asc0 0
-FALCON => setenv preboot run start_netconsole
-```
-
-To get a NetConsole also set the IP:
+`FALCON =>`
 
 ```sh
-FALCON => setenv ncip 192.168.1.1
+setenv asc0 0
+setenv preboot run start_netconsole
 ```
 
-Check `bootdelay` to ensure that it is greater than 0.
+Check `bootdelay` to ensure that it is greater than `0`.
 
 Finally save the changes:
 
-```
-FALCON => saveenv
+`FALCON =>`
+
+```sh
+saveenv
 ```
 
 The next boot should then provide a prompt on the serial console or NetConsole.

@@ -1,6 +1,8 @@
 # Backup Firmware
 
-Capture files from device
+See [U-Boot Defaults](env-defaults.txt)
+
+## Capture files from device
 
 ```sh
 ssh ONTUSER@192.168.1.10 # SUGAR2A041
@@ -11,13 +13,14 @@ ssh ONTUSER@192.168.1.10 # SUGAR2A041
 mkdir /tmp/dump
 cd /tmp/dump
 
-# capture configs
+# capture state
 cat /proc/mtd > mtd
 cat /proc/cmdline > cmdline
 uname -a > uname
-fw_printenv > env.txt
 
-grep goi_config env.txt > env.uniq.txt
+# capture configs
+fw_printenv > env.txt
+grep goi_config env.txt > env.goi_config.txt
 
 ritool dump > ritool.txt
 ```
