@@ -1,5 +1,5 @@
 --- G-010S-A.env.txt	2024-11-03 15:22:16.696133605 -0600
-+++ G-010S-P.env.txt	2024-11-03 15:58:53.762038311 -0600
++++ G-010S-P.env.txt	2024-11-03 16:43:29.773901819 -0600
 @@ -3,12 +3,13 @@
  a2_image=3FE46542AAAA_a2.bin
  act_img_addr=0xBF20003C
@@ -19,7 +19,7 @@
  bootcmd=run flash_flash
  bootdelay=5
  boot_fail=0
-@@ -18,26 +19,33 @@
+@@ -18,26 +19,32 @@
  boot_image=run boot_image${c_img};
  c_img=0
  commit=0
@@ -42,9 +42,9 @@
  image0_is_valid=1
 +image0_version=FS v5
  image1_addr=0xB0800000
-+image1_is_valid=0
- image1_is_valid=1
+-image1_is_valid=1
 -image_name=g010sa
++image1_is_valid=0
 +image_name=openwrt-lantiq-falcon-SFP
  import_uboot_env=env import -t ${ram_addr} ${filesize}
  ipaddr=192.168.1.10
@@ -56,7 +56,7 @@
  load_kernel=tftpboot ${ram_addr} ${tftppath}${image_name}-uImage
  load_uboot_env=tftp ${ram_addr} ${tftppath}u-boot.env
  load_uboot_env_y=loady ${ram_addr}
-@@ -47,20 +55,23 @@
+@@ -47,20 +54,23 @@
  magic_addr=0xBF200038
  magic_val=0xDEADBEEF
  max_kernel_size=180000
@@ -86,7 +86,7 @@
  serverip=192.168.1.100
  start_netconsole=if test -n ${ncip}; then echo 'check for netconsole'; if ping ${ncip}; then run netconsole; echo 'netconsole enabled'; fi; fi
  stderr=serial
-@@ -68,12 +79,12 @@
+@@ -68,12 +78,12 @@
  stdout=serial
  update_A0=gpio clear 102;tftpboot ${ram_addr} ${tftppath}${a0_image};eeprom write 50 ${ram_addr} 0 ${filesize}
  update_A2=tftpboot ${ram_addr} ${tftppath}${a2_image};sf probe 0;sf erase ${a2_iaddr} +${filesize};sf write ${ram_addr} ${a2_iaddr} ${filesize}
