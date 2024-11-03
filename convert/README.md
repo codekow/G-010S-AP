@@ -89,8 +89,8 @@ crc32 0x82F00000 0x344E66
 sf probe 0
 
 # erase / write memory to flash (mtd2)
-sf erase 0xC0000 0x740000
-sf write 0x82F00000 0xC0000 0x740000
+sf erase 0x0C0000 0x740000
+sf write 0x82F00000 0x0C0000 0x740000
 
 # erase / write memory to flash (mtd5)
 sf erase 0x800000 0x800000
@@ -99,7 +99,7 @@ sf write 0x82F00000 0x800000 0x800000
 
 ```sh
 # read flash (mtd2) to memory, verify crc
-sf read 0x82F00000 0xC0000 0x740000
+sf read 0x82F00000 0x0C0000 0x740000
 crc32 0x82F00000 0x00740000
 # CRC32 for 82f00000 ... 8363ffff ==> 2ebe0a35
 
@@ -206,4 +206,12 @@ sf probe 0
 # erase / write memory to flash (mtd0)
 sf erase 0x00000 0x40000
 sf write 0x82F00000 0x00000 0x40000
+```
+
+Debug Dump
+
+```sh
+setenv select_image 'setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;echo mw ${magic_addr} 0x0;echo mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 
+
+&& test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0'
 ```
