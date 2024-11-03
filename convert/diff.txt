@@ -1,5 +1,5 @@
 --- backup/G-010S-A.env.txt	2024-11-03 15:22:16.696133605 -0600
-+++ convert/G-010S-P.env.txt	2024-11-03 15:48:35.627129638 -0600
++++ convert/G-010S-P.env.txt	2024-11-03 15:58:53.762038311 -0600
 @@ -3,12 +3,13 @@
  a2_image=3FE46542AAAA_a2.bin
  act_img_addr=0xBF20003C
@@ -61,11 +61,10 @@
  magic_val=0xDEADBEEF
  max_kernel_size=180000
 -mtdparts=mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
-+mtdparts
++mtdparts=mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)
  netconsole=set stderr nulldev;set stdin nc,serial;set stdout nc,serial
  net_nfs=run load_kernel nfsargs addip addmtdparts0 addmisc;bootm ${ram_addr}
--next_active=0
-+next_active
+ next_active=0
  nfsargs=setenv bootargs root=/dev/nfs rw nfsroot=${serverip}:${rootpath},${nfsoptions}
  nfsoptions=rsize=1024,wsize=1024
 -preboot=gpio clear 100
