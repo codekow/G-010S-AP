@@ -87,11 +87,11 @@ crc32 0x82F00000 0x344E66
 # erase flash for mtd2
 sf probe 0
 
-# erase /write memory to flash (mtd2)
+# erase / write memory to flash (mtd2)
 sf erase 0xC0000 0x740000
 sf write 0x82F00000 0xC0000 0x740000
 
-# erase /write memory to flash (mtd5)
+# erase / write memory to flash (mtd5)
 sf erase 0x800000 0x800000
 sf write 0x82F00000 0x800000 0x800000
 ```
@@ -168,4 +168,29 @@ setenv preboot 'run if_netconsole start_netconsole'
 saveenv
 
 run select_image boot_image0
+```
+
+Update uBoot
+
+```sh
+md5sum 0_uboot.bin
+# md5sum 992b31a67c644aa68cf7f9caf956b1f9
+```
+
+```sh
+# load mtd0 into memory
+tftpboot 0x82F00000 convert-G-010S-P/0_uboot.bin
+
+# check memory
+crc32 0x82F00000 0x344E66
+# If this doesn't match, DO NOT continue!
+```
+
+```sh
+# The following are destructive commands
+sf probe 0
+
+# erase / write memory to flash (mtd0)
+sf erase 0x00000 0x40000
+sf write 0x82F00000 0x00000 0x40000
 ```

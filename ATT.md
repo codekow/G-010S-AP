@@ -9,7 +9,7 @@ Patch - Disable Local 802.x Enforcement
 Find current Image
 
 ```sh
-cat /proc/mtd | grep image
+grep image /proc/mtd
 ```
 
 ```sh
