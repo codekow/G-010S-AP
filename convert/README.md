@@ -115,6 +115,7 @@ Convert uBoot Env
 setenv a0_image
 setenv a2_image
 setenv a2_iaddr
+setenv act_img_addr '0xBF20003C'
 setenv addmisc 'setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} ignore_loglevel vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts}'
 setenv addmtdparts0 'setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)'
 setenv addmtdparts1 'setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(image0),8192k(linux)'
@@ -211,7 +212,63 @@ sf write 0x82F00000 0x00000 0x40000
 Debug Dump
 
 ```sh
-setenv select_image 'setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;echo mw ${magic_addr} 0x0;echo mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 
+dev:    size   erasesize  name
+mtd0: 00040000 00010000 "uboot"
+mtd1: 00080000 00010000 "uboot_env"
+mtd2: 00740000 00010000 "image0"
+mtd3: 00800000 00010000 "linux"
+mtd4: 006d919a 00010000 "rootfs"
+mtd5: 004b0000 00010000 "rootfs_data"
+```
 
-&& test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0'
+```sh
+dev:    size   erasesize  name
+mtd0: 00040000 00010000 "uboot"
+mtd1: 00080000 00010000 "uboot_env"
+mtd2: 00740000 00010000 "linux"
+mtd3: 0061919a 00010000 "rootfs"
+mtd4: 003f0000 00010000 "rootfs_data"
+mtd5: 00800000 00010000 "image1"
+```
+
+```sh
+act_img_addr=0xBF20003C
+magic_addr=0xBF200038
+magic_val=0xDEADBEEF
+
+select_image=
+
+setenv activate_image -1
+
+if itest *${magic_addr} == ${magic_val}
+  then 
+  if itest *${act_img_addr} == 0
+    then setenv activate_image 0
+  fi
+  if itest *${act_img_addr} == 1 
+    then setenv activate_image 1
+  fi
+  mw ${magic_addr} 0x0
+  mw ${act_img_addr} 0x0
+fi
+
+if test $activate_image = -1 
+  then setenv c_img $committed_image
+  else setenv c_img $activate_image
+    setenv activate_image -1
+fi
+
+if test $c_img = 0 && test $image0_is_valid = 0
+  then setenv c_img 1
+fi
+
+if test $c_img = 1 && test $image1_is_valid = 0
+  then setenv c_img 0
+fi
+
+if test $image0_is_valid = 0 && test $image1_is_valid = 0
+  then setenv c_img _err
+fi
+
+exit 0
 ```
