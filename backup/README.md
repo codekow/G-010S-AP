@@ -106,17 +106,17 @@ Set TFTP Path
 setenv tftppath 'dump-3FE46541AADA/'
 ```
 
-|Offset   |Length   |Description |
-|---------|---------|------------|
-|0x000000 |0x040000 |uboot       |
-|0x040000 |0x080000 |uboot_env   |
-|0x0C0000 |0x600000 |image0      |
-|0x6C0000 |0x600000 |image1      |
-|0xCC0000 |0x100000 |configfs    |
-|0xDC0000 |0x210000 |logfs       |
-|0xFD0000 |0x010000 |ri          |
-|0xFE0000 |0x010000 |sfp         |
-|0xFF0000 |0x010000 |ribackup    |
+| Offset   | Length   | Description |
+|----------|----------|-------------|
+| 0x000000 | 0x040000 | uboot       |
+| 0x040000 | 0x080000 | uboot_env   |
+| 0x0C0000 | 0x600000 | image0      |
+| 0x6C0000 | 0x600000 | image1      |
+| 0xCC0000 | 0x100000 | configfs    |
+| 0xDC0000 | 0x210000 | logfs       |
+| 0xFD0000 | 0x010000 | ri          |
+| 0xFE0000 | 0x010000 | sfp         |
+| 0xFF0000 | 0x010000 | ribackup    |
 
 ```sh
 setenv mtd1 0x040000
