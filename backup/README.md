@@ -67,12 +67,13 @@ sudo dnsmasq \
 Default File List
 
 ```list
-configfs.image
-g010sa-squashfs.image
-logfs.image
 3FE46542AAAA_ri.bin
 3FE46542AAAA_a0.bin
 3FE46542AAAA_a2.bin
+configfs.image
+g010sa-squashfs.image
+logfs.image
+u-boot.env
 ```
 
 Default Restore Functions
@@ -96,6 +97,10 @@ setenv update_image0 'tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.ima
 setenv update_image1 'tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${kernel1_offs} +${filesize};sf write ${ram_addr} ${kernel1_offs} ${filesize}'
 setenv update_logfs 'tftpboot ${ram_addr} ${tftppath}logfs.image;sf probe 0;sf erase ${log_iaddr} +${filesize};sf write ${ram_addr} ${log_iaddr} ${filesize}'
 setenv update_ri 'tftpboot ${ram_addr} ${tftppath}${ri_image};sf probe 0;sf erase ${ri_hiaddr} +${filesize};sf write ${ram_addr} ${ri_hiaddr} ${filesize};sf erase ${ri_siaddr} +${filesize};sf write ${ram_addr} ${ri_siaddr} ${filesize}'
+
+setenv load_uboot_env 'tftpboot ${ram_addr} ${tftppath}u-boot.env'
+setenv import_uboot_env 'env import -t ${ram_addr} ${filesize}'
+setenv update_uboot_env 'run load_uboot_env && run import_uboot_env && saveenv'
 ```
 
 ## Restore From Captured Files
