@@ -4,6 +4,7 @@ If anything goes wrong during an update the SFP module can be unbricked via
 NetConsole or a serial console.
 
 ## Preparation / Unlock Bootloader
+
 <a id="preparation"></a>
 
 By default the bootloader is locked and will not display a serial console / will
