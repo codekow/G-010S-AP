@@ -1,5 +1,14 @@
 # Convert G-010S-A to G-010S-P
 
+G-010S-P Flash
+
+| Offset   | Length   | Description |
+|----------|----------|-------------|
+| 0x000000 | 0x040000 | uboot       |
+| 0x040000 | 0x080000 | uboot_env   |
+| 0x0C0000 | 0x740000 | image0      |
+| 0x800000 | 0x800000 | image1      |
+
 ## Links
 
 - https://hack-gpon.org/ont-huawei-ma5671a/#list-of-firmwares-and-files
@@ -207,68 +216,4 @@ sf probe 0
 # erase / write memory to flash (mtd0)
 sf erase 0x00000 0x40000
 sf write 0x82F00000 0x00000 0x40000
-```
-
-Debug Dump
-
-```sh
-dev:    size   erasesize  name
-mtd0: 00040000 00010000 "uboot"
-mtd1: 00080000 00010000 "uboot_env"
-mtd2: 00740000 00010000 "image0"
-mtd3: 00800000 00010000 "linux"
-mtd4: 006d919a 00010000 "rootfs"
-mtd5: 004b0000 00010000 "rootfs_data"
-```
-
-```sh
-dev:    size   erasesize  name
-mtd0: 00040000 00010000 "uboot"
-mtd1: 00080000 00010000 "uboot_env"
-mtd2: 00740000 00010000 "linux"
-mtd3: 0061919a 00010000 "rootfs"
-mtd4: 003f0000 00010000 "rootfs_data"
-mtd5: 00800000 00010000 "image1"
-```
-
-```sh
-act_img_addr=0xBF20003C
-magic_addr=0xBF200038
-magic_val=0xDEADBEEF
-
-select_image=
-
-setenv activate_image -1
-
-if itest *${magic_addr} == ${magic_val}
-  then 
-  if itest *${act_img_addr} == 0
-    then setenv activate_image 0
-  fi
-  if itest *${act_img_addr} == 1 
-    then setenv activate_image 1
-  fi
-  mw ${magic_addr} 0x0
-  mw ${act_img_addr} 0x0
-fi
-
-if test $activate_image = -1 
-  then setenv c_img $committed_image
-  else setenv c_img $activate_image
-    setenv activate_image -1
-fi
-
-if test $c_img = 0 && test $image0_is_valid = 0
-  then setenv c_img 1
-fi
-
-if test $c_img = 1 && test $image1_is_valid = 0
-  then setenv c_img 0
-fi
-
-if test $image0_is_valid = 0 && test $image1_is_valid = 0
-  then setenv c_img _err
-fi
-
-exit 0
 ```

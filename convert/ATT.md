@@ -50,6 +50,15 @@ fw_setenv image0_is_valid 1
 fw_setenv committed_image 0
 ```
 
+Sync SSH Host Keys
+
+```sh
+# pull host keys
+scp -O root@192.168.1.10:/etc/dropbear/* ./
+# restore host keys
+scp -O dropbear* root@192.168.1.10:/etc/dropbear/
+```
+
 Reboot and repeat 802.x patch above
 
 ```sh

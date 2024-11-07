@@ -43,7 +43,7 @@ Transfer files from device
 
 ```sh
 mkdir -p dump/
-scp ONTUSER@192.168.1.10:/tmp/dump/*  dump/ # SUGAR2A041
+scp -O ONTUSER@192.168.1.10:/tmp/dump/*  dump/ # SUGAR2A041
 ```
 
 ## Restore Firmware
