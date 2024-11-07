@@ -1,4 +1,3 @@
-/firmwares/*/
 /firmwares/*_patched.bin
 /OpenWrt-Toolchain-*
 /patches/0000_dropbear/build
