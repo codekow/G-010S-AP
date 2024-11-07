@@ -1,6 +1,7 @@
 # Backup / Restore Firmware
 
 See [U-Boot Defaults](env-defaults.txt)
+See [EEPROM Tech Sheet](https://cdn.hackaday.io/files/21599924091616/AN_2030_DDMI_for_SFP_Rev_E2.pdf)
 
 ## Capture Files From Device
 
