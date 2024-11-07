@@ -266,6 +266,7 @@ Kermit transfer (use loady for YMODEM, loadx for XMODEM):
 ```sh
 loadb 0x80800000
 ```
+
 Expected Output:
 
 ```sh
@@ -424,10 +425,9 @@ preparation step:
 
 ```sh
 setenv asc0 0
-setenv preboot run start_netconsole
+setenv bootdelay 5
+setenv preboot
 ```
-
-Check `bootdelay` to ensure that it is greater than `0`.
 
 Finally save the changes:
 

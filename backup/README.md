@@ -26,6 +26,8 @@ fw_printenv > env.txt
 grep goi_config env.txt > env.goi_config.txt
 
 ritool dump > ritool.txt
+sfp_i2c -r > eeprom.txt
+sfp_ddm_tool dumpA0 > /tmp/dumpA0.txt
 ```
 
 ```sh
@@ -105,12 +107,6 @@ setenv update_uboot_env 'run load_uboot_env && run import_uboot_env && saveenv'
 
 ## Restore From Captured Files
 
-Set TFTP Path
-
-```sh
-setenv tftppath 'dump-3FE46541AADA/'
-```
-
 | Offset   | Length   | Description |
 |----------|----------|-------------|
 | 0x000000 | 0x040000 | uboot       |
@@ -123,6 +119,12 @@ setenv tftppath 'dump-3FE46541AADA/'
 | 0xFE0000 | 0x010000 | sfp         |
 | 0xFF0000 | 0x010000 | ribackup    |
 
+Set TFTP Path
+
+```sh
+setenv tftppath 'dump-3FE46541AADA/'
+```
+
 ```sh
 setenv mtd1 0x040000
 setenv mtd2 0x0C0000
@@ -134,7 +136,6 @@ setenv mtd9 0xFE0000
 setenv mtd10 0xFF0000
 
 setenv ram_addr 80F00000
-setenv tftppath dump-3FE46541AADA
 
 setenv restore_mtd1 'tftpboot ${ram_addr} ${tftppath}/mtd1ro;sf probe 0;sf erase ${mtd1} +${filesize};sf write ${ram_addr} ${mtd1} ${filesize}'
 setenv restore_mtd2 'tftpboot ${ram_addr} ${tftppath}/mtd2ro;sf probe 0;sf erase ${mtd2} +${filesize};sf write ${ram_addr} ${mtd2} ${filesize}'
