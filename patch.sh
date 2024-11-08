@@ -25,8 +25,8 @@ ROOTFS_ABS="$PWD/$ROOTFS"
 printf "\nPatching rootfs ...\n"
 for PATCH_DIR in patches/*
 do
-    echo " - $PATCH_DIR :"
-    cd "$PATCH_DIR" && { ./patch.sh "$ROOTFS_ABS"; cd ../..; }
+    echo " - ${PATCH_DIR}:"
+    cd "${PATCH_DIR}" && { ./patch.sh "$ROOTFS_ABS"; cd ../..; }
 done
 
 printf "\nCreating new squashfs image\n"
