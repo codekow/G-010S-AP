@@ -107,8 +107,7 @@ syslogd_generate_conf()
     echo 'local1.*          /tmp/event_messages' >> /tmp/syslog.conf
 	echo 'local2.=info	/logs/srmf_normal_log' >> /tmp/syslog.conf
 	echo 'local2.=alert	/logs/srmf_abnormal_log' >> /tmp/syslog.conf
-
-    echo '*.=debug          /tmp/debug' >> /tmp/syslog.conf
+    echo '*.=debug          /dev/null' >> /tmp/syslog.conf
     #generating syslog.conf end
 }
 
