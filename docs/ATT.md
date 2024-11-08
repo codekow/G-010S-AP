@@ -6,24 +6,6 @@ Patch - Disable Local 802.x Enforcement
 [ "$(md5sum /opt/lantiq/bin/omcid | cut -d' ' -f 1)" = "525139425009c4138e92766645dad7d0" ] && printf '\x00' | dd of=/opt/lantiq/bin/omcid conv=notrunc seek=275337 bs=1 count=1 2>/dev/null && echo patched
 ```
 
-Fix: `boot_fail`
-
-```sh
-cat > /etc/init.d/fix_boot_fail.sh <<FILE
-#!/bin/sh /etc/rc.common
-
-START=99
-
-start() {
-  fw_printenv boot_fail | grep -q '0' || \
-    fw_setenv boot_fail '0'
-}
-FILE
-
-chmod +x /etc/init.d/fix_boot_fail.sh
-/etc/init.d/fix_boot_fail.sh enable
-```
-
 Fix: some security
 
 ```sh
