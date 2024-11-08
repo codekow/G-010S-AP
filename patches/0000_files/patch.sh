@@ -32,7 +32,7 @@ patch_banner(){
   echo "Pathing /etc/banner..."
   REV=$(git rev-parse --short HEAD) || REV=unknown
   echo "patched: $(date)" >> "${ROOTFS}/etc/banner"
-  echo "commit: ${REV}" >> "${ROOTFS}/etc/banner"
+  echo "revision: ${REV}" >> "${ROOTFS}/etc/banner"
 }
 
 apply_patches
