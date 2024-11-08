@@ -1,15 +1,19 @@
 # Backup / Restore Firmware
 
-See [U-Boot Defaults](env-defaults.txt)
+The following instructions will help you make a backup of critical data to restore your device to original state.
+
+## Additional Info
+
+See [G-010S-A U-Boot Defaults](../convert/G-010S-A.env.txt)
 See [EEPROM Tech Sheet](https://cdn.hackaday.io/files/21599924091616/AN_2030_DDMI_for_SFP_Rev_E2.pdf)
 
 ## Capture Files From Device
 
-`ONTUSER@SFP#`
-
 ```sh
 ssh ONTUSER@192.168.1.10 # SUGAR2A041
 ```
+
+`ONTUSER@SFP#`
 
 ```sh
 # make backup dir
@@ -52,6 +56,8 @@ scp -O ONTUSER@192.168.1.10:/tmp/dump/*  dump/ # SUGAR2A041
 ## Restore Firmware
 
 Run TFTP server
+
+The following example is for running `dnsmasq` on Linux. Any TFTP server will work.
 
 ```sh
 sudo systemctl stop firewalld
@@ -151,6 +157,8 @@ setenv restore_mtd10 'tftpboot ${ram_addr} ${tftppath}/mtd8ro;sf probe 0;sf eras
 setenv restore_firmware 'run restore_mtd1 restore_mtd2 restore_mtd3 restore_mtd6 restore_mtd7 restore_mtd8 restore_mtd9 restore_mtd10'
 
 run restore_firmware
+```
 
+```sh
 reset
 ```

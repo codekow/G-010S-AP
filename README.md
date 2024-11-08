@@ -4,6 +4,10 @@
 
 This repository is meant to gather all available information on the G-010S-A GPON SFP, including firmware(s) and modifications.
 
+## Backup
+
+Before making any changes to your device it is best to [make a backup](docs/BACKUP.md).
+
 ## Compatibility and Known Issues
 
 <a id="compatibility"></a>
