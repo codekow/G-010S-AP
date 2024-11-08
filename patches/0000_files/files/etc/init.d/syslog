@@ -1,0 +1,230 @@
+#!/bin/sh
+
+# File name: syslog
+# This file is the syslogd and rsyslogd init script.
+# rsyslogd has higher priority than syslog, so if rsyslogd exist in system, syslog is ignored.
+# Terms: 
+#       syslog: both syslogd and rsyslogd.
+#       syslogd: busybox syslogd.
+#       rsyslogd: the rocket-fast system for log processing. 
+
+# Common variables definition
+LOGD=/sbin
+KLOGD=klogd
+SLOGD=syslogd
+RLOGD=rsyslogd
+SYSLOG_CONF=/tmp/syslog.conf
+RSYSLOGD_CONF=/tmp/rsyslog.conf
+SYSLOG_FILE=/logs/messages
+
+# CMD_CFGFILE changed via command line or WEB GUI(Customer log level)
+SYSLOGD_CMD_CFGFILE=/logs/syslog_cmd_config
+SYSLOGD_CMD_TMP_CFGFILE=/tmp/syslog_cmd_config
+RSYSLOGD_CMD_CFGFILE=/logs/rsyslog_cmd_config
+RSYSLOGD_CMD_TMP_CFGFILE=/tmp/rsyslog_cmd_config
+
+# Syslogd configurations
+# Todo: add syslog level here, PT load testing Req.
+filenum=2
+filesize=1024
+
+# Rsyslogd configurations
+rgw_fs=2097152
+rgw_lv=notice
+beacon_fs=2097152
+beacon_lv=notice
+rgw_custlevel=info
+forward=0
+mac=`ritool get MACAddress | cut -d: -f2- | sed 's/://g'`
+
+# Generating rsyslogd configuration file /tmp/rsyslog.conf
+rsyslogd_generate_conf()
+{
+    echo "Generating rsyslog.conf"
+    echo '$ModLoad imudp.so' > /tmp/rsyslog.conf
+    echo '$ModLoad imuxsock.so' >> /tmp/rsyslog.conf
+    echo '$ModLoad imklog.so' >> /tmp/rsyslog.conf
+    echo '$template EventMsgFormat,"%timegenerated%[%syslogseverity-text%]%msg%\n"' >> /tmp/rsyslog.conf
+    echo '$template FileFormat,"[%syslogseverity-text%] <%PRI%>1 %TIMESTAMP:::date-rfc3339% %HOSTNAME% %APP-NAME% %PROCID% %MSGID% %STRUCTURED-DATA% %msg%\n"' >> /tmp/rsyslog.conf
+    echo '$template RemoteLogFormat,"[%fromhost-ip%]:[%syslogseverity-text%] <%PRI%>1 %TIMESTAMP:::date-rfc3339% %HOSTNAME% %APP-NAME% %PROCID% %MSGID% %STRUCTURED-DATA% %msg%\n"' >> /tmp/rsyslog.conf
+    echo '$template SendingLogFormat,"<%PRI%>%TIMESTAMP:::date-rfc3339% %HOSTNAME%_'${mac}' %syslogtag:1:32% %msg:::sp-if-no-1st-sp%%msg%"' >> /tmp/rsyslog.conf
+    echo '$RuleSet local' >> /tmp/rsyslog.conf
+    echo '$outchannel' "messages_rotation,/logs/messages, $rgw_fs,/usr/exe/syslog_rotation_script.sh /logs/messages" >> /tmp/rsyslog.conf
+    echo '$outchannel' "customer_rotation,/logs/customer, $rgw_fs,/usr/exe/syslog_rotation_script.sh /logs/customer" >> /tmp/rsyslog.conf
+    echo '$outchannel' "beacon_rotation,/logs/beacon_syslog, $beacon_fs,/usr/exe/syslog_rotation_script.sh /logs/beacon_syslog" >> /tmp/rsyslog.conf
+	echo '$outchannel' "srmf_abnormal_log_rotation,/logs/srmf_abnormal_log, $rgw_fs,/usr/exe/syslog_rotation_script.sh /logs/srmf_abnormal_log" >> /tmp/rsyslog.conf	
+    echo '$outchannel' "srmf_normal_log_rotation,/logs/srmf_normal_log, $rgw_fs,/usr/exe/syslog_rotation_script.sh /logs/srmf_normal_log" >> /tmp/rsyslog.conf
+	echo 'auth,authpriv,user.notice;local0.'"$rgw_custlevel"';kern,syslog,daemon.'"$rgw_lv"' :omfile:$messages_rotation;FileFormat' >> /tmp/rsyslog.conf
+    echo 'local1.*  |/tmp/event_messages;EventMsgFormat' >> /tmp/rsyslog.conf
+    echo 'local0.'"$rgw_custlevel"' :omfile:$customer_rotation;FileFormat' >> /tmp/rsyslog.conf
+	echo 'local2.=info :omfile:$srmf_normal_log_rotation;FileFormat' >> /tmp/rsyslog.conf
+	echo 'local2.=alert :omfile:$srmf_abnormal_log_rotation;FileFormat' >> /tmp/rsyslog.conf
+    if [ $forward -eq 1 ]
+    then
+        echo "auth,authpriv,user.notice;kern,syslog,daemon.$rgw_lv action(type=\"omfwd\" target=\"$remote_ip\" port=\"514\" protocol=\"udp\" template=\"SendingLogFormat\")" >> /tmp/rsyslog.conf
+    fi
+    echo '$DefaultRuleset local' >> /tmp/rsyslog.conf
+    echo '$RuleSet remote' >> /tmp/rsyslog.conf
+    echo "*.$beacon_lv"' :omfile:$beacon_rotation;RemoteLogFormat'>> /tmp/rsyslog.conf
+    if [ $forward -eq 1 ]
+    then
+        echo "*.$beacon_lv"' @'"$remote_ip:514">> /tmp/rsyslog.conf
+    fi
+    echo '$InputUDPServerBindRuleset remote' >> /tmp/rsyslog.conf
+    echo '$UDPServerRun 514' >> /tmp/rsyslog.conf    
+}
+
+rsyslogd_start()
+{
+     mkfifo /tmp/event_messages
+
+     if [ -e "/etc/localtime" ]; then
+         TZ=/etc/localtime
+         export TZ
+         echo "rsyslog start TZ ev $TZ"
+     fi
+
+     #start rsyslogd and generate rsyslog.conf
+     rsyslogd_generate_conf
+     echo "rsyslogd starting"
+     $RLOGD -f /tmp/rsyslog.conf
+     $KLOGD
+}
+
+rsyslogd_restart()
+{
+    $RLOGD -f /tmp/rsyslog.conf&
+}
+
+syslogd_generate_conf()
+{
+    #generating syslog.conf
+    echo "Generating syslog.conf"
+    touch    /tmp/syslog.conf
+    chmod    755    /tmp/syslog.conf
+    echo "auth,authpriv,user.info;kern,syslog,daemon.$rgw_lv /logs/messages" > /tmp/syslog.conf
+    echo "local0.$rgw_lv /logs/customer" >> /tmp/syslog.conf
+    echo 'local1.*          /tmp/event_messages' >> /tmp/syslog.conf
+	echo 'local2.=info	/logs/srmf_normal_log' >> /tmp/syslog.conf
+	echo 'local2.=alert	/logs/srmf_abnormal_log' >> /tmp/syslog.conf
+
+    echo '*.=debug          /tmp/debug' >> /tmp/syslog.conf
+    #generating syslog.conf end
+}
+
+syslogd_start()
+{
+     syslogd_generate_conf
+     echo "syslogd starting"
+     $SLOGD -s $filesize -b $filenum -f /tmp/syslog.conf
+     $KLOGD
+}
+
+syslogd_restart()
+{
+    $SLOGD -s $filesize -b $filenum -f /tmp/syslog.conf&
+}
+
+# Load configuration file, overwrite default value.
+syslog_load_cmd_cfgfile()
+{
+    if [ -e $SYSLOGD_CMD_CFGFILE ]; then
+        source $SYSLOGD_CMD_CFGFILE
+    fi
+    if [ -e $SYSLOGD_CMD_TMP_CFGFILE ]; then
+        source $SYSLOGD_CMD_TMP_CFGFILE
+    fi
+
+    if [ -e "$RSYSLOGD_CMD_CFGFILE" ]; then
+        source $RSYSLOGD_CMD_CFGFILE
+    fi
+    # RSYSLOGD_CMD_TMP_CFGFILE has higher priority than RSYSLOGD_CMD_CFGFILE
+    if [ -e "$RSYSLOGD_CMD_TMP_CFGFILE" ]; then
+        source $RSYSLOGD_CMD_TMP_CFGFILE
+    fi
+}
+
+# clear all the syslog configurations
+syslog_conf_cleanup()
+{
+    #rm -fr /tmp/event_messages > /dev/null 2>&1 
+    rm -fr /tmp/rsyslog.conf > /dev/null 2>&1 
+    rm -fr /tmp/syslog.conf > /dev/null 2>&1 
+}
+
+#stop, means syslogd or rsyslogd is running, just stop the process.
+syslog_stop()
+{
+    echo "stopping syslog $KLOGD $SLOGD $RLOGD"
+    if [ -e /tmp/daemon/rsyslogd.dm ]; then
+        rm -f /tmp/daemon/rsyslogd.dm > /dev/null 2>&1
+    fi
+    if [ -e /var/run/rsyslogd.pid ]; then
+        rm -f /var/run/rsyslogd.pid > /dev/null 2>&1 
+    fi
+    killall -q -KILL $KLOGD $SLOGD $RLOGD
+    rm -f /var/run/rsyslogd.pid > /dev/null 2>&1 
+}
+
+# start, means syslogd or rsyslogd first time booting up, need generate configuration file
+syslog_start()
+{
+    syslog_conf_cleanup
+    syslog_load_cmd_cfgfile
+    if [ -e "$LOGD/$RLOGD" ]; then
+        rsyslogd_start
+    else
+        syslogd_start
+    fi
+}
+
+# restart, means syslogd or rsyslog is running, need restart due to configuration file changed.
+syslog_restart()
+{
+    syslog_stop
+    echo "restarting syslog"
+    syslog_start
+}
+
+# This function used to register file into AONT daemon system, only for rsyslogd at current release(HDR6101)
+syslog_dm_register()
+{
+    if [ -e "$LOGD/$RLOGD" ]; then
+        if [ ! -d /tmp/daemon ]; then
+            mkdir -p /tmp/daemon
+        fi
+        echo "rsyslogd" > /tmp/daemon/rsyslogd.dm
+        echo "1" >> /tmp/daemon/rsyslogd.dm
+        echo "null" >> /tmp/daemon/rsyslogd.dm
+        echo "0" >> /tmp/daemon/rsyslogd.dm
+        echo "dm_syslog.sh" >> /tmp/daemon/rsyslogd.dm
+        pid=`ps | grep rsyslogd | grep -v grep | grep -v Z | awk '{print $1}'`
+        echo "$pid" >> //tmp/daemon/rsyslogd.dm
+    fi
+}
+
+date >> $SYSLOG_FILE
+echo $0 $* >> $SYSLOG_FILE
+
+# Remove legacy syslog files.
+rm -rf /logs/messages*.tar.gz > /dev/null 2>&1
+
+# Main starts here
+case $1 in
+    start)
+            syslog_start
+            syslog_dm_register
+            exit 0
+       ;;
+
+    restart)
+            syslog_restart
+            syslog_dm_register
+            exit 0
+        ;;
+
+    stop)
+            syslog_stop
+            exit 0
+        ;;
+esac

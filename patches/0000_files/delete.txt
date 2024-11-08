@@ -1,1 +1,7 @@
+# etc/rc.d/S50telnet
+configs/dummp.file
+configs/magic
 home/ONTUSER/dummp.file
+home/ONTUSER/magic
+logs/dummp.file
+logs/magic
