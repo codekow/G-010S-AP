@@ -7,7 +7,6 @@ apply_patches(){
   ls *.patch 2>/dev/null || return 0
   for patch in *.patch
   do
-    echo "Applying ${patch}..."
     patch -p1 -d "$ROOTFS" < "${patch}"
   done
 }
