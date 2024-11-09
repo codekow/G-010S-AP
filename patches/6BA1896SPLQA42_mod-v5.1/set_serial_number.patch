@@ -1,0 +1,9 @@
+--- a/opt/lantiq/bin/set_serial_number	2021-06-29 04:00:54.000000000 -0500
++++ b/opt/lantiq/bin/set_serial_number	2023-03-17 11:21:52.000000000 -0500
+@@ -14,4 +14,4 @@
+       usage
+ fi
+ 
+-${sfp}  -s  $*  -i  8
++fw_setenv onu_serial "$*"
+diff -ru a/sbin/firstboot b/sbin/firstboot

@@ -1,0 +1,111 @@
+--- a/etc/init.d/onu.sh	2021-09-17 21:25:34.000000000 -0500
++++ b/etc/init.d/onu.sh	2023-05-02 13:29:24.000000000 -0500
+@@ -20,25 +20,35 @@
+ }
+ 
+ ploam_config() {
+-	local nSerial
+-	nSerial=""
+-	for i in `seq 5`; do
+-	    nSerial=`/opt/lantiq/bin/sfp_i2c -g 2>&- | cut -f2 -d=`
+-	    if [ -n "$nSerial" ]; then
+-		break
+-	    fi
+-	done
+-	if [ -z "$nSerial" ]; then
+-		nSerial=`fw_printenv nSerial 2>&- | cut -f2 -d=`
+-		if [ -z "$nSerial" ]; then
+-			# create out of lantiq OID and ether mac the serial number
+-			ethaddr=$(awk 'BEGIN{RS=" ";FS="="} $1 == "ethaddr" {print $2}' /proc/cmdline)
+-			nSerial=$(echo $ethaddr | awk 'BEGIN{FS=":"} {print "SPTC"$3""$4""$5""$6""}')
+-		fi
++	local onu_serial
++
++	tmp=`fw_printenv onu_serial 2>&- | cut -f2 -d=`
++	if [ -n "$tmp" ]; then
++		onu_serial="$tmp"
++	else
++		# create out of lantiq OID and ether mac the serial number
++		logger -t "[onu]" "Using fallback ONU serial generated with ether mac"
++		ethaddr=$(awk 'BEGIN{RS=" ";FS="="} $1 == "ethaddr" {print $2}' /proc/cmdline)
++		onu_serial=$(echo $ethaddr | awk 'BEGIN{FS=":"} {print "SPTC"$3""$4""$5""$6""}')
+ 	fi
++	
+ 	onu ploam_init
+-	logger -t "[onu]" "Using ploam serial number: $nSerial"
+-	onu gtcsns $nSerial
++	logger -t "[onu]" "Using ploam serial number: $onu_serial"
++	onu gtcsns $onu_serial
++}
++
++
++generate_ploam_password_hex() {
++    local ploam_string=$1
++    local ploam_len=${#ploam_string}
++
++    # We have to add NUL (0x00) characters to the end of the ploam if it is less than 10 characters
++    for c in $(seq $ploam_len 9); do
++        ploam_string="${ploam_string}\x00"
++    done
++
++    # Return ploam in hex
++    echo -ne "${ploam_string}" | hexdump -v -e '/1 "0x%02X "' | xargs
+ }
+ 
+ #
+@@ -67,7 +77,8 @@
+ 	local nLaserOffset
+ 	local nLaserEnEndExt
+ 	local nLaserEnStartExt
+-	local nPassword
++	local onu_ploam
++	local onu_ploam_hex
+ 	local nT01
+ 	local nT02
+ 
+@@ -84,11 +95,31 @@
+ 	config_get nLaserOffset "gtc" nLaserOffset
+ 	config_get nLaserEnEndExt "gtc" nLaserEnEndExt
+ 	config_get nLaserEnStartExt "gtc" nLaserEnStartExt
+-	nPassword=""
+-	nPassword=`fw_printenv nPassword 2>&- | cut -f2 -d=`
+-	if [ -z "$nPassword" ]; then
+-	   config_get nPassword "ploam" nPassword
++	
++	tmp=`fw_printenv onu_ploam 2>&- | cut -f2 -d=`
++	if [ -n "$tmp" ]; then
++		onu_ploam="$tmp"
++	else
++		logger -t "[onu]" "Using fallback ONU ploam (0000000000)"
++		onu_ploam="0000000000"
++	fi
++	
++	onu_ploam_hex=$(generate_ploam_password_hex "${onu_ploam}")
++	
++	tmp=`fw_printenv onu_loid 2>&- | cut -f2 -d=`
++	if [ -n "$tmp" ]; then
++		fw_setenv omci_loid "$tmp"
++	else
++		fw_setenv omci_loid "user"
++	fi
++	
++	tmp=`fw_printenv onu_loid_password 2>&- | cut -f2 -d=`
++	if [ -n "$tmp" ]; then
++		fw_setenv omci_lpwd "$tmp"
++	else
++		fw_setenv omci_lpwd "password"
+ 	fi
++	
+ 	config_get nRogueMsgIdUpstreamReset "ploam" nRogueMsgIdUpstreamReset
+ 	config_get nRogueMsgRepeatUpstreamReset "ploam" nRogueMsgRepeatUpstreamReset
+ 	config_get nRogueMsgIdDeviceReset "ploam" nRogueMsgIdDeviceReset
+@@ -105,7 +136,7 @@
+ 	config_get nDyingGaspHyst "gtc" nDyingGaspHyst
+ 	config_get nDyingGaspMsg "gtc" nDyingGaspMsg
+ 
+-	onu gtccs 3600000 5 9 10 $nRogueMsgIdUpstreamReset $nRogueMsgRepeatUpstreamReset $nRogueMsgIdDeviceReset $nRogueMsgRepeatDeviceReset $nRogueEnable $nT01 $nT02 $(falcon_ploam_emergency_stop_state_get) $nPassword
++	onu gtccs 3600000 5 9 10 $nRogueMsgIdUpstreamReset $nRogueMsgRepeatUpstreamReset $nRogueMsgIdDeviceReset $nRogueMsgRepeatDeviceReset $nRogueEnable $nT01 $nT02 $(falcon_ploam_emergency_stop_state_get) $onu_ploam_hex
+ 	onu gtci $bDlosEnable $bDlosInversion $nDlosWindowSize $nDlosTriggerThreshold $nLaserGap $nLaserOffset $nLaserEnEndExt $nLaserEnStartExt
+ 
+ 	onu gtc_dying_gasp_cfg_set $nDyingGaspEnable $nDyingGaspHyst $nDyingGaspMsg
+diff -ru a/etc/init.d/sfp_eeprom.sh b/etc/init.d/sfp_eeprom.sh

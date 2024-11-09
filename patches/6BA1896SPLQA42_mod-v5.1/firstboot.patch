@@ -1,0 +1,43 @@
+--- a/sbin/firstboot	2021-03-17 01:53:29.000000000 -0500
++++ b/sbin/firstboot	2023-05-02 13:11:10.000000000 -0500
+@@ -1,3 +1,38 @@
+ #!/bin/sh
+ 
+-/sbin/jffs2reset
++echo "Welcome to FS.com firmware MODDED version 5.1" > /dev/console
++echo "Resetting rootfs_data" > /dev/console
++umount /overlay 1> /dev/null 2> /dev/null || true
++jffs2reset -y 1> /dev/null 2> /dev/null
++echo "Resetting GPON specific uboot env" > /dev/console
++fw_setenv mib_file_custom
++fw_setenv mib_file
++fw_setenv omci_hw_ver
++fw_setenv omci_omcc_ver
++fw_setenv omci_equip_id
++fw_setenv omci_vendor_id
++fw_setenv onu_serial
++fw_setenv onu_ploam
++fw_setenv onu_loid
++fw_setenv onu_loid_password
++fw_setenv sfp_vendor_name
++fw_setenv sfp_part_name
++fw_setenv sfp_vendor_rev
++fw_setenv sfp_part_serial
++fw_setenv sfp_date_code
++fw_setenv sfp_vendor_data
++fw_setenv sgmii_mode
++fw_setenv image0_version "FS v5"
++fw_setenv image1_version "FS v5"
++echo "Resetting management IP to 192.168.1.10" > /dev/console
++fw_setenv ipaddr 192.168.1.10
++fw_setenv gatewayip 192.168.2.1
++echo "Enforce bootloader unlock (better safe than sorry)" > /dev/console
++fw_setenv bootdelay 5
++fw_setenv asc0 0
++fw_setenv preboot "gpio set 3;gpio input 2;gpio input 105;gpio input 106;gpio input 107;gpio input 108"
++
++echo "!!!!!!!!!!!!!!!!!!!!!!" > /dev/console
++echo "Now you should unplug and reconnect the SFP!" > /dev/console
++echo "Hardware reboot is required! After this restart the firmware is ready to use" > /dev/console
++echo "!!!!!!!!!!!!!!!!!!!!!!" > /dev/console
+Only in a/: www

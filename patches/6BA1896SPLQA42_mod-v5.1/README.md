@@ -69,6 +69,14 @@ md5sum opt/lantiq/bin/omcid*
 7e97163e24c9cb39439589c65b438168  opt/lantiq/bin/omcid.orig
 ```
 
+## Disable Local 802.x Enforcement
+
+This patch disables 802.x enforcement (certificate athentication - aka: wpa_supplicant).
+
+```sh
+[ "$(md5sum opt/lantiq/bin/omcid | cut -d' ' -f 1)" = "525139425009c4138e92766645dad7d0" ] && printf '\x00' | dd of=opt/lantiq/bin/omcid conv=notrunc seek=275337 bs=1 count=1 2>/dev/null && echo patched
+```
+
 ## Disable RX_LOS status
 
 Some switches/routers (e.g. Mikrotik) do not allow access to the management
