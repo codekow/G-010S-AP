@@ -45,4 +45,4 @@ apply_patches
 delete_files
 sync_files
 patch_banner
-# fix_perms
+fix_perms
