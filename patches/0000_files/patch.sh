@@ -35,7 +35,14 @@ patch_banner(){
   echo "revision: ${REV}" >> "${ROOTFS}/etc/banner"
 }
 
+fix_perms(){
+  find "${ROOTFS}" \! -user root -print
+  echo "Setting chmod root:root on all files..."
+  chown root:root -R "${ROOTFS}"
+}
+
 apply_patches
 delete_files
 sync_files
 patch_banner
+fix_perms

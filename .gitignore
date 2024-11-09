@@ -2,5 +2,6 @@
 /firmwares/G-010S-*/*/
 /OpenWrt-Toolchain-*
 /patches/0000_dropbear/build
+/patches/enabled.txt
 scratch/
 dump*
