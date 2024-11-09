@@ -217,3 +217,45 @@ sf probe 0
 sf erase 0x00000 0x40000
 sf write 0x82F00000 0x00000 0x40000
 ```
+
+```sh
+grep image /proc/mtd
+```
+
+If you are on image0 (flashing image1):
+
+```sh
+mtd -e image1 write /tmp/firmware.img image1
+fw_setenv image1_version v5-1
+fw_setenv image1_is_valid 1
+fw_setenv target oem-generic
+fw_setenv committed_image 1
+```
+
+If you are on image1 (flashing image0):
+
+```sh
+mtd -e image0 write /tmp/firmware.img image0
+fw_setenv image0_version v5-1
+fw_setenv image0_is_valid 1
+fw_setenv target oem-generic
+fw_setenv committed_image 0
+```
+
+Fix: `boot_fail`
+
+```sh
+cat > /etc/init.d/fix_boot_fail.sh <<FILE
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+  fw_printenv boot_fail | grep -q '0' || \
+    fw_setenv boot_fail '0'
+}
+FILE
+
+chmod +x /etc/init.d/fix_boot_fail.sh
+/etc/init.d/fix_boot_fail.sh enable
+```
