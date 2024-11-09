@@ -93,3 +93,8 @@ e14a5a70b023873853afe920870f076e  lib/modules/3.10.49/mod_optic.ko
 7c718c3410c4120fe98fa7a9a5c6c407  lib/modules/3.10.49/mod_optic.ko.orig
 ```
 
+## Additional Notes
+
+```sh
+find -type f -exec md5sum '{}' \; > md5sum.txt
+```
