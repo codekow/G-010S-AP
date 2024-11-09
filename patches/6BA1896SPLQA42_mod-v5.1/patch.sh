@@ -44,5 +44,5 @@ fix_perms(){
 apply_patches
 delete_files
 sync_files
-patch_banner
+# patch_banner
 fix_perms

@@ -25,13 +25,13 @@ ROOTFS_ABS="$PWD/$ROOTFS"
 process_patches(){
     printf "\nPatching rootfs ...\n"
 
-    echo "# $(date)" > "${ROOTFS}/etc/config/patches"
+    # echo "# $(date)" > "${ROOTFS}/etc/config/patches"
 
     for PATCH_DIR in patches/*/
     do
         grep -q "${PATCH_DIR}" patches/enabled.txt || continue
         echo " - ${PATCH_DIR}:"
-        echo "${PATCH_DIR}" >> "${ROOTFS}/etc/config/patches"
+        # echo "${PATCH_DIR}" >> "${ROOTFS}/etc/config/patches"
         cd "${PATCH_DIR}" && { ./patch.sh "$ROOTFS_ABS"; cd ../..; }
     done
 }

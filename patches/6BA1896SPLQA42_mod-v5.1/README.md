@@ -39,7 +39,7 @@ ed03f65a25e48591ceebe1b2a4504a56  usr/sbin/dropbear
 
 ```sh
 8855ec74aeeea16a744f3373896bbd58  bin/busybox
-7c718c3410c4120fe98fa7a9a5c6c407  lib/modules/3.10.49/mod_optic.ko
+e14a5a70b023873853afe920870f076e  lib/modules/3.10.49/mod_optic.ko
 525139425009c4138e92766645dad7d0  opt/lantiq/bin/omcid
 dded114001dda79c427d932c41a81cf7  usr/sbin/dropbear
 ```
