@@ -3,10 +3,12 @@
 This is my best attempt to reverse engineer and trace the steps to
 rebuild the `6BA1896SPLQA42_MODDED_ver5-1.img` that is floating around.
 
-The file system permissions on the image above are incorrect.
+NOTE: The file system ownership on the image above is incorrect.
 
 Running this patch on G-010-P firmware `6BA1896SPLQA42.bin` should reproduce
 the same outcome.
+
+You can verify with [6BA1896SPLQA42_MODDED_ver5-1.md5sum](6BA1896SPLQA42_MODDED_ver5-1.md5sum)
 
 I have cherry picked the binaries from the modded firmware.
 TODO: document how to rebuild them.
