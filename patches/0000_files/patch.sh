@@ -4,7 +4,7 @@ set -e
 ROOTFS=$1
 
 apply_patches(){
-  ls *.patch 2>/dev/null || return 0
+  ls -- *.patch 2>/dev/null || return 0
   for patch in *.patch
   do
     patch -p1 -d "$ROOTFS" < "${patch}"
@@ -15,11 +15,16 @@ delete_files(){
   echo "Deleting unwanted files..."
   grep -v '^ *#' < delete.txt | while IFS= read -r file
   do
+    set -x
     [ "${ROOTFS}/${file}" = "/" ] && continue
     [ ! -e "${ROOTFS}/${file}" ] && continue
-    [ -d "${ROOTFS}/${file}" ] && rm -rf "${ROOTFS}/${file}"
-    [ -f "${ROOTFS}/${file}" ] && rm "${ROOTFS}/${file}"
+    if [ -d "${ROOTFS}/${file}" ]; then
+      rm -rf "${ROOTFS:?}/${file:?}"
+    else
+      [ -f "${ROOTFS}/${file}" ] && rm -- "${ROOTFS}/${file}"
+    fi
   done
+  set +x
 }
 
 sync_files(){
