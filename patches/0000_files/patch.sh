@@ -18,7 +18,7 @@ delete_files(){
     [ "${ROOTFS}/${file}" = "/" ] && continue
     [ ! -e "${ROOTFS}/${file}" ] && continue
     [ -d "${ROOTFS}/${file}" ] && rm -rf "${ROOTFS}/${file}"
-    rm "${ROOTFS}/${file}"
+    [ -f "${ROOTFS}/${file}" ] && rm "${ROOTFS}/${file}"
   done
 }
 
