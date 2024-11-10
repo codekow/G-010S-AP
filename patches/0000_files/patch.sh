@@ -15,7 +15,7 @@ delete_files(){
   echo "Deleting unwanted files..."
   grep -v '^ *#' < delete.txt | while IFS= read -r file
   do
-    [ "${ROOTFS}/${file}" "/" ] && continue
+    [ "${ROOTFS}/${file}" = "/" ] && continue
     [ ! -e "${ROOTFS}/${file}" ] && continue
     [ -d "${ROOTFS}/${file}" ] && rm -rf "${ROOTFS}/${file}"
     rm "${ROOTFS}/${file}"
