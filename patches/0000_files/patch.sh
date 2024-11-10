@@ -15,8 +15,9 @@ delete_files(){
   echo "Deleting unwanted files..."
   grep -v '^ *#' < delete.txt | while IFS= read -r file
   do
-    [ -z "${file}" ] && continue
+    [ "${ROOTFS}/${file}" "/" ] && continue
     [ ! -e "${ROOTFS}/${file}" ] && continue
+    [ -d "${ROOTFS}/${file}" ] && rm -rf "${ROOTFS}/${file}"
     rm "${ROOTFS}/${file}"
   done
 }
@@ -44,5 +45,5 @@ fix_perms(){
 apply_patches
 delete_files
 sync_files
-patch_banner
-# fix_perms
+# patch_banner
+fix_perms
