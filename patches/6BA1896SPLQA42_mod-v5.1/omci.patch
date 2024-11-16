@@ -1,8 +1,0 @@
---- a/etc/config/omci	2021-09-17 21:24:23.000000000 -0500
-+++ b/etc/config/omci	2023-01-26 16:45:43.000000000 -0600
-@@ -1,3 +1,3 @@
- config 'omci' 'default'
--	option 'mib_file' '/etc/mibs/data_1g_8q.ini'
-+	option 'mib_file' '/etc/mibs/data_1g_8q_us1280_ds512.ini'
- 	option 'status_file' '/tmp/omci_status'
-diff -ru a/etc/init.d/boot b/etc/init.d/boot

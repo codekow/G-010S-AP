@@ -1,3 +1,5 @@
 # cp enabled.txt.example enabled.txt
 # select the patches you want applied
+# include 'patches' in the path
+# include '/' at the far right
 patches/0000_files/
