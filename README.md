@@ -191,3 +191,7 @@ In case the SFP module gets bricked during an update see the guide
 highly recommended to follow the [Preparation](unbricking.md#preparation) step
 in the guide before making changes to unlock the bootloader and make unbricking
 easier.
+
+## Links
+
+- https://hack-gpon.org
