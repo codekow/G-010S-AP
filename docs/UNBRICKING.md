@@ -349,7 +349,7 @@ With the pins shortened the SFP module will not be able to read the boot loader
 from the flash chip, making it fall back into a recovery mode that allows
 uploading a new boot loader.
 
-![Flash Image](images/flash_short.png)
+![Flash Image](../images/flash_short.png)
 
 Once the boot prompt is visible remove the short between the pins.
 

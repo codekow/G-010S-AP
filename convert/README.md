@@ -1,5 +1,9 @@
 # Convert G-010S-A to G-010S-P
 
+NOTE: Below are notes taken from an adventure into the unknown. The hardware is different between the `G-010S-A` and the `G-010S-P` so anything you try below is likely to give unexpected results. YMMV.
+
+## Flash Layout
+
 G-010S-P Flash
 
 | Offset   | Length   | Description |

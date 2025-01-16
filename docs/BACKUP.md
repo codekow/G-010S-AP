@@ -2,12 +2,9 @@
 
 The following instructions will help you make a backup of critical data to restore your device to original state.
 
-## Additional Info
+Anytime you are modifying firmware you run the risk of bricking your device.
 
-See [G-010S-A U-Boot Defaults](../convert/G-010S-A.env.txt)
-See [EEPROM Tech Sheet](https://cdn.hackaday.io/files/21599924091616/AN_2030_DDMI_for_SFP_Rev_E2.pdf)
-
-## Capture Files From Device
+## Backup / Capture Files From Device
 
 ```sh
 ssh ONTUSER@192.168.1.10 # SUGAR2A041
@@ -55,7 +52,11 @@ scp -O ONTUSER@192.168.1.10:/tmp/dump/*  dump/ # SUGAR2A041
 
 ## Restore Firmware
 
-Run TFTP server
+NOTE: These instructions have **not** been tested on inexperienced users. They are to help those familiar development have a backup for [unbricking](UNBRICKING.md).
+
+In short, good news! If you backed up your firmware, you should be able to recover it (you just might not know how to restore it).
+
+### Run TFTP server
 
 The following example is for running `dnsmasq` on Linux. Any TFTP server will work.
 
@@ -112,7 +113,7 @@ setenv import_uboot_env 'env import -t ${ram_addr} ${filesize}'
 setenv update_uboot_env 'run load_uboot_env && run import_uboot_env && saveenv'
 ```
 
-## Restore From Captured Files
+### Restore From Captured Files
 
 | Offset   | Length   | Description |
 |----------|----------|-------------|
@@ -162,3 +163,9 @@ run restore_firmware
 ```sh
 reset
 ```
+
+## Additional Info
+
+- See [G-010S-A U-Boot Defaults](../convert/G-010S-A.env.txt)
+
+- See [EEPROM Tech Sheet](https://cdn.hackaday.io/files/21599924091616/AN_2030_DDMI_for_SFP_Rev_E2.pdf)
