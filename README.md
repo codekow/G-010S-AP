@@ -71,7 +71,13 @@ The commands shown below are all meant to be used on the SSH command-line.
 
 In addition to the standard 1Gbps SFP (SGMII), the chipset supports 2.5Gbps HSGMII.
 
-It can be configured to auto-select 1Gbps/2.5Gbps:
+It can be configured to auto-select 1 Gbps / 2.5 Gbps:
+
+| Mode | Speed    | Auto Negotiation |
+|------|----------|------------------|
+|   3  | 1 Gbps   |   On             |
+|   4  | 2.5 Gbps |   Off            |
+|   5  | 2.5 Gbps |   On             |
 
 ```sh
 fw_setenv sgmii_mode 5
@@ -83,10 +89,7 @@ The current speed can be checked with:
 onu lanpsg 0
 ```
 
-The `link_status` value shows the speed:
-
-* 4 => 1Gbps
-* 5 => 2.5Gbps
+The `link_status` value shows the speed.
 
 The number of devices which support the 2.5Gbps mode is limited.
 A SFP+ network card based on BCM57810S can be used with a patched Linux/FreeBSD driver: <https://www.dslreports.com/forum/r32230041-Internet-Bypassing-the-HH3K-up-to-2-5Gbps-using-a-BCM57810S-NIC>
