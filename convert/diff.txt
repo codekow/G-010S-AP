@@ -1,0 +1,104 @@
+--- G-010S-A.env.txt	2024-11-03 15:22:16.696133605 -0600
++++ G-010S-P.env.txt	2024-11-03 16:43:29.773901819 -0600
+@@ -3,12 +3,13 @@
+ a2_image=3FE46542AAAA_a2.bin
+ act_img_addr=0xBF20003C
+ addip=setenv bootargs ${bootargs} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}:${netdev}:off
+-addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype}  vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts} quiet
+-addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
+-addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(image0),6144k(linux),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
+-asc0=3
++addmisc=setenv bootargs ${bootargs} ethaddr=${ethaddr} machtype=${machtype} ignore_loglevel vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M ${mtdparts}
++addmtdparts0=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)
++addmtdparts1=setenv mtdparts mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(image0),8192k(linux)
++asc0=0
+ baudrate=115200
+-bootargs=rootfstype=squashfs,jffs2 ip=192.168.1.10:192.168.1.100:192.168.2.1::::off ethaddr=ac:9a:96:00:00:00 machtype=SFP vpe1_load_addr=0x83f00000 vpe1_mem=1M mem=63M mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup) quiet
++bertEnable=0
++bootargs
+ bootcmd=run flash_flash
+ bootdelay=5
+ boot_fail=0
+@@ -18,26 +19,32 @@
+ boot_image=run boot_image${c_img};
+ c_img=0
+ commit=0
+-config_iaddr=0xCC0000
++committed_image=0
++config_iaddr
+ env_offs=0x40000
+ env_offs_redund=0x80000
+ ethact=SERDES
+ ethaddr=ac:9a:96:00:00:00
+ ethprime=SERDES
++fileaddr=80F00000
++filesize=400092
+ flashargs=setenv bootargs rootfstype=squashfs,jffs2
+ flash_flash=run select_image boot_image
+ gatewayip=192.168.2.1
++gphy0_phyaddr=0
++gphy1_phyaddr=1
+ image0_addr=0xB00C0000
+ image0_is_valid=1
++image0_version=FS v5
+ image1_addr=0xB0800000
+-image1_is_valid=1
+-image_name=g010sa
++image1_is_valid=0
++image_name=openwrt-lantiq-falcon-SFP
+ import_uboot_env=env import -t ${ram_addr} ${filesize}
+ ipaddr=192.168.1.10
+ kernel0_from_sf=sf probe 0;sf read ${ram_addr} ${kernel0_offs} ${max_kernel_size}
+ kernel0_offs=0xC0000
+ kernel1_from_sf=sf probe 0;sf read ${ram_addr} ${kernel1_offs} ${max_kernel_size}
+-kernel1_offs=0x6C0000
++kernel1_offs=0x800000
+ load_kernel=tftpboot ${ram_addr} ${tftppath}${image_name}-uImage
+ load_uboot_env=tftp ${ram_addr} ${tftppath}u-boot.env
+ load_uboot_env_y=loady ${ram_addr}
+@@ -47,20 +54,23 @@
+ magic_addr=0xBF200038
+ magic_val=0xDEADBEEF
+ max_kernel_size=180000
+-mtdparts=mtdparts=sflash:256k(uboot)ro,512k(uboot_env),6144k(linux),6144k(image1),1024k(configfs),2112k(logfs),64k(ri),64k(sfp),64k(ribackup)
++mtdparts=mtdparts=sflash:256k(uboot)ro,512k(uboot_env),7424k(linux),8192k(image1)
+ netconsole=set stderr nulldev;set stdin nc,serial;set stdout nc,serial
+ net_nfs=run load_kernel nfsargs addip addmtdparts0 addmisc;bootm ${ram_addr}
+ next_active=0
+ nfsargs=setenv bootargs root=/dev/nfs rw nfsroot=${serverip}:${rootpath},${nfsoptions}
+ nfsoptions=rsize=1024,wsize=1024
+-preboot=gpio clear 100
++nSerial=HWTC1CFA349A
++omci_loid=loid
++omci_lpwd=loidpass
++preboot
+ ram_addr=80F00000
+ reset_uboot_env=env default -f -a; saveenv
+-ri_hiaddr=0xFD0000
+-ri_image=3FE46542AAAA_ri.bin
+-ri_siaddr=0xFF0000
++ri_hiaddr
++ri_image
++ri_siaddr
+ save_uboot=sf probe 0;sf erase 0 40000;sf write ${ram_addr} 0 ${filesize}
+-select_image=if test -n $commit  ; then else setenv commit  _err;saveenv;fi;if test -n $image0_is_valid ; then else setenv image0_is_valid 1;saveenv;fi;if test -n $image1_is_valid ; then else setenv image1_is_valid 0;saveenv;fi;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv next_active 0;fi;if itest *${act_img_addr} == 1 ; then setenv next_active 1;fi;mw ${magic_addr} 0x0;mw ${act_img_addr} 0x0;fi;if test $next_active = -1 ; then setenv c_img $commit;else setenv c_img $next_active;if test $next_active != $commit ;then if test $next_active = 0 ;then setenv next_active 1;setenv image0_is_valid 0;setenv commit 1;else setenv next_active 0;setenv image1_is_valid 0;setenv commit 0;fi;saveenv;fi;fi;exit 0
++select_image=setenv activate_image -1;if itest *${magic_addr} == ${magic_val} ; then if itest *${act_img_addr} == 0 ; then setenv activate_image 0;fi;if itest *${act_img_addr} == 1 ; then setenv activate_image 1;fi;mw ${magic_addr} 0x0;mw ${act_img_addr} 0x0;fi;if test $activate_image = -1 ; then setenv c_img $committed_image;else setenv c_img $activate_image;setenv activate_image -1;fi;if test $c_img = 0 && test $image0_is_valid = 0 ; then setenv c_img 1;fi;if test $c_img = 1 && test $image1_is_valid = 0 ; then setenv c_img 0;fi;if test $image0_is_valid = 0 && test $image1_is_valid = 0 ; then setenv c_img _err;fi;exit 0
+ serverip=192.168.1.100
+ start_netconsole=if test -n ${ncip}; then echo 'check for netconsole'; if ping ${ncip}; then run netconsole; echo 'netconsole enabled'; fi; fi
+ stderr=serial
+@@ -68,12 +78,12 @@
+ stdout=serial
+ update_A0=gpio clear 102;tftpboot ${ram_addr} ${tftppath}${a0_image};eeprom write 50 ${ram_addr} 0 ${filesize}
+ update_A2=tftpboot ${ram_addr} ${tftppath}${a2_image};sf probe 0;sf erase ${a2_iaddr} +${filesize};sf write ${ram_addr} ${a2_iaddr} ${filesize}
+-update_configfs=tftpboot ${ram_addr} ${tftppath}configfs.image;sf probe 0;sf erase ${config_iaddr} +${filesize};sf write ${ram_addr} ${config_iaddr} ${filesize}
++update_configfs
+ update_image0=tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${kernel0_offs} +${filesize};sf write ${ram_addr} ${kernel0_offs} ${filesize}
+ update_image1=tftpboot ${ram_addr} ${tftppath}${image_name}-squashfs.image;sf probe 0;sf erase ${kernel1_offs} +${filesize};sf write ${ram_addr} ${kernel1_offs} ${filesize}
+-update_logfs=tftpboot ${ram_addr} ${tftppath}logfs.image;sf probe 0;sf erase ${log_iaddr} +${filesize};sf write ${ram_addr} ${log_iaddr} ${filesize}
++update_logfs
+ update_openwrt=run update_system
+-update_ri=tftpboot ${ram_addr} ${tftppath}${ri_image};sf probe 0;sf erase ${ri_hiaddr} +${filesize};sf write ${ram_addr} ${ri_hiaddr} ${filesize};sf erase ${ri_siaddr} +${filesize};sf write ${ram_addr} ${ri_siaddr} ${filesize}
++update_ri     
+ update_system=run update_image0 && setenv commit 0 && setenv image0_is_valid 1 && saveenv
+ update_uboot_env=run load_uboot_env && run import_uboot_env && saveenv
+ update_uboot_env_y=run load_uboot_env_y && run import_uboot_env && saveenv

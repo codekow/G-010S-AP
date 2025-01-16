@@ -1,8 +1,14 @@
-# G-010S-A
+# G-010S-A / G010S-P
 
 ## Introduction
 
-This repository is meant to gather all available information on the G-010S-A GPON SFP, including firmware(s) and modifications.
+This repository is meant to gather all available information on the G-010S-A and G010S-P GPON SFP, including known firmware(s) and modifications.
+
+Please use authoritative sources and known hashes to verify your firmware. The license associated with this repo does not represent software included in binary files (firmware).
+
+## Backup
+
+Before making any changes to your device it is best to [make a backup](docs/BACKUP.md).
 
 ## Compatibility and Known Issues
 
@@ -45,32 +51,6 @@ is set in `/etc/init.d/sfp_eeprom.sh` with `sfp_i2c -i 0x1fc -w 0x02`. One possi
 
 See `extract.sh` and `patch.sh` in this repository for information about
 creating a patched firmware.
-
-## Compatibility and Known Issues
-
-<a id="compatibility"></a>
-
-Depending on the SFP host there may be various compatibility issues and behavior
-changes with the SFP module.
-
-* **Pin 6 issue**: With some hosts the module is not properly recognized as
-  "present" due to pin 6 on the module not being fully grounded.
-* **Requires fiber**: The host will only connect to the module if a fiber signal
-  is detected. Without a fiber the module signals "LOS" which the host
-  interprets as "do not communicate".
-* **DyingGasp Issue**: If the module firmware enables *dying gasp* then the host
-  will cause the module to reboot before being fully active.
-
-This table lists the known behaviors:
-
-| SFP Host                  | PIN 6 Issue         | Requires Fiber | DyingGasp Issue
-|---------------------------|---------------------|----------------|-----------------
-| BCM57810S                 | Always              | N              | ?
-| CSR305                    | When serial enabled | Y              | ?
-| 10Gtek WG-33-1GX1GT-SFP   | Never               | N              | N
-| Netgear GS752TPV2         | Never               | N              | Y
-| MC220L                    | Never               | ?              | ?
-| SolidRun Clearfog         | When serial enabled | Y              | Y
 
 ## Configuration access
 
