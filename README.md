@@ -1,8 +1,10 @@
-# G-010S-AP
+# G-010S-A / G010S-P
 
 ## Introduction
 
-This repository is meant to gather all available information on the G-010S-A and G010S-P GPON SFP, including firmware(s) and modifications.
+This repository is meant to gather all available information on the G-010S-A and G010S-P GPON SFP, including known firmware(s) and modifications.
+
+Please use authoritative sources and known hashes to verify your firmware. The license associated with this repo does not represent software included in binary files (firmware).
 
 ## Backup
 
